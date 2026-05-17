@@ -1,0 +1,206 @@
+import { NextResponse } from 'next/server';
+
+function fixCase(s: string): string {
+  if (s.length < 2 || /[a-z]/.test(s)) return s;
+  return s.replace(/\b\w/g, c => c.toUpperCase()).replace(/\B[A-Z]/g, c => c.toLowerCase());
+}
+
+function clean(text: string): string {
+  return text
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<\/div>/gi, '\n\n')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"')
+    .replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function slug(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9áéíóúñ]+/g, '-').replace(/^-|-$/g, '');
+}
+
+const SITES = [
+  {
+    name: 'letras.com',
+    url: (a: string, t: string) => `https://www.letras.com/${slug(a)}/${slug(t)}/`,
+    pattern: /<div[^>]*class="[^"]*lyric-original[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
+  },
+  {
+    name: 'letras.mus.br',
+    url: (a: string, t: string) => `https://www.letras.mus.br/${slug(a)}/${slug(t)}/`,
+    pattern: /<div[^>]*class="[^"]*lyric-original[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
+  },
+  {
+    name: 'genius.com',
+    url: (a: string, t: string) => `https://genius.com/${slug(a)}-${slug(t)}-lyrics`,
+    pattern: /<div[^>]*data-lyrics-container="true"[^>]*>([\s\S]*?)<\/div>/i,
+  },
+];
+
+async function trySite(url: string, pattern: RegExp): Promise<string | null> {
+  try {
+    const html = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+    }).then(r => r.text());
+    if (html.length > 5000 && !/page not found|não encontrada|404|Page Not Found/i.test(html)) {
+      const m = html.match(pattern);
+      if (m) {
+        const lyrics = clean(m[1]);
+        return lyrics.length > 50 ? lyrics : null;
+      }
+    }
+  } catch {}
+  return null;
+}
+
+async function getMeta(url: string): Promise<{ title: string; artist: string } | null> {
+  try {
+    const html = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+    }).then(r => r.text());
+    const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    if (!match) return null;
+    let t = match[1]
+      .replace(/ - (Letras\.com|LETRAS\.COM|Letras\.mus\.br|Genius|lyrics).*$/i, '')
+      .replace(/ \| (Genius|Genius Lyrics).*$/i, '')
+      .trim();
+    const parts = t.split(' - ');
+    if (parts.length >= 2) return { title: fixCase(parts[0].trim()), artist: fixCase(parts.slice(1).join(' - ').trim()) };
+    return { title: fixCase(t), artist: '' };
+  } catch { return null; }
+}
+
+function normalize(s: string): string {
+  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function titleMatch(query: string, title: string): boolean {
+  const nq = normalize(query);
+  const nt = normalize(title);
+  return nt === nq || nt.startsWith(nq + ' ') || nt.includes(' ' + nq + ' ') || nt.endsWith(' ' + nq) || nt.startsWith(nq);
+}
+
+async function searchCandidates(query: string): Promise<{ title: string; artist: string }[]> {
+  try {
+    const res = await fetch(`https://genius.com/api/search/song?q=${encodeURIComponent(query)}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+    });
+    const data = await res.json();
+    const hits = data?.response?.sections?.[0]?.hits || [];
+    return hits
+      .map((h: any) => ({
+        title: fixCase(h?.result?.title || ''),
+        artist: fixCase(h?.result?.primary_artist?.name || ''),
+      }))
+      .filter((c: { title: string; artist: string }) => c.title && c.artist && titleMatch(query, c.title))
+      .slice(0, 10);
+  } catch { return []; }
+}
+
+async function tryLyrics(title: string, artist: string): Promise<{ title: string; artist: string; lyrics: string } | null> {
+  for (const site of SITES) {
+    const url = site.url(artist, title);
+    const lyrics = await trySite(url, site.pattern);
+    if (lyrics) {
+      const meta = await getMeta(url);
+      return { title: meta?.title || title, artist: meta?.artist || artist, lyrics };
+    }
+  }
+  try {
+    const api = await fetch(
+      `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`,
+      { headers: { 'User-Agent': 'Mozilla/5.0' } },
+    ).then(r => r.json());
+    if (api.lyrics) {
+      const lyrics = clean(api.lyrics);
+      if (lyrics.length > 30) return { title, artist, lyrics };
+    }
+  } catch {}
+  return null;
+}
+
+function artistParts(name: string): string[] {
+  const parts: string[] = [name];
+  const words = name.split(/\s+/).filter(Boolean);
+  if (words.length > 1) {
+    parts.push(words[0]);
+    parts.push(words[words.length - 1]);
+    parts.push(words.slice(0, -1).join(' '));
+    if (words.length > 2) {
+      parts.push(words.slice(-2).join(' '));
+      parts.push(words.slice(0, 2).join(' '));
+    }
+  }
+  return [...new Set(parts)];
+}
+
+async function fetchLyrics(searchTitle: string, searchArtist: string): Promise<{ title: string; artist: string; lyrics: string } | null> {
+  // If artist is provided, try each variation
+  if (searchArtist) {
+    const artists = artistParts(searchArtist);
+    for (const a of artists) {
+      const result = await tryLyrics(searchTitle, a);
+      if (result) return result;
+    }
+  }
+
+  // Without artist, try Genius direct URL
+  if (!searchArtist) {
+    const url = `https://genius.com/${slug(searchTitle)}-lyrics`;
+    const lyrics = await trySite(url, SITES[2].pattern);
+    if (lyrics) {
+      const meta = await getMeta(url);
+      return { title: meta?.title || searchTitle, artist: meta?.artist || '', lyrics };
+    }
+  }
+
+  // Search Genius for candidates and try each one
+  const candidates = await searchCandidates(searchTitle);
+  for (const c of candidates) {
+    const result = await tryLyrics(c.title, c.artist);
+    if (result) return result;
+    // Also try with the original search title
+    const result2 = await tryLyrics(searchTitle, c.artist);
+    if (result2) return result2;
+  }
+
+  // Last resort: try splitting query into last words as artist guess
+  if (!searchArtist) {
+    const words = searchTitle.split(/\s+/);
+    if (words.length >= 3) {
+      for (let i = 1; i < words.length; i++) {
+        const possibleArtist = words.slice(i).join(' ');
+        const possibleTitle = words.slice(0, i).join(' ');
+        const result = await tryLyrics(possibleTitle, possibleArtist);
+        if (result) return result;
+      }
+    }
+  }
+
+  return null;
+}
+
+export async function POST(request: Request) {
+  try {
+    const { title, artist, query, mode } = await request.json();
+    if (!title && !query) return NextResponse.json({ error: 'Título requerido' }, { status: 400 });
+
+    const searchTitle = title || query || '';
+    const searchArtist = artist || '';
+
+    // Search mode: return multiple candidates
+    if (mode === 'search') {
+      const candidates = await searchCandidates(searchTitle);
+      return NextResponse.json({ candidates });
+    }
+
+    // Normal mode: fetch lyrics directly
+    const result = await fetchLyrics(searchTitle, searchArtist);
+    if (result) return NextResponse.json(result);
+
+    return NextResponse.json({ error: 'No se encontró la letra' }, { status: 404 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Error al buscar' }, { status: 500 });
+  }
+}
