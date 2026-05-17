@@ -5,13 +5,15 @@ import { Link, Search } from 'lucide-react';
 import Spinner from './Spinner';
 
 interface SongSearchInputsProps {
-  onSongFound: (data: { title: string; artist: string; lyrics: string; cover?: string }) => void;
+  onSongFound: (data: { title: string; artist: string; lyrics?: string; chords?: string; cover?: string }) => void;
 }
 
 interface Candidate {
   title: string;
   artist: string;
 }
+
+type SearchMode = 'lyrics' | 'chords';
 
 export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps) {
   const [scrapeUrl, setScrapeUrl] = useState('');
@@ -24,6 +26,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [trySource, setTrySource] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  const [searchMode, setSearchMode] = useState<SearchMode>('lyrics');
 
   function norm(s: string): string {
     return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -106,21 +109,27 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
         const res = await fetch('/api/google-lyrics', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: c.title, artist: c.artist, query }),
+          body: JSON.stringify({
+            title: c.title,
+            artist: c.artist,
+            query,
+            search_mode: searchMode,
+          }),
         });
         const data = await res.json();
-        if (data.lyrics || data.title) {
+        if ((data.lyrics || data.chords) || data.title) {
           const cover = await fetchSpotifyCover(data.title || c.title, data.artist || c.artist);
           onSongFound({
             title: data.title || c.title,
             artist: data.artist || c.artist,
-            lyrics: data.lyrics || '',
+            lyrics: searchMode === 'lyrics' ? (data.lyrics || '') : undefined,
+            chords: searchMode === 'chords' ? (data.chords || '') : undefined,
             cover,
           });
           setSearchTitle('');
           setSearchArtist('');
           setCandidates([]);
-          setSearchMsg('✅ Letra encontrada!');
+          setSearchMsg(`✅ ${searchMode === 'lyrics' ? 'Letra' : 'Acordes'} encontrados!`);
           setTimeout(() => setSearchMsg(''), 3000);
           setFetchingLyrics(false);
           return;
@@ -144,14 +153,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
             onChange={e => setScrapeUrl(e.target.value)}
             placeholder="Pegar link de letras (Genius, Letras, etc)..."
             className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
-            style={
-              {
-                background: 'var(--input-bg)', 
-                border: '1px solid var(--border-color)',
-                color: 'var(--text-primary)',
-
-              }
-            }
+            style={{ background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
           />
           <button
             type="button"
@@ -190,7 +192,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
 
       {/* Sección de búsqueda por título/artista */}
       <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row gap-2 items-center">
+          <div className="flex flex-col sm:flex-row gap-2 items-center">
           {/* Selector de modo: Letra o Acordes */}
           <div className="flex gap-1 sm:gap-2">
             {(['lyrics', 'chords'] as const).map(mode => (
@@ -206,9 +208,8 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
                 className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                   searchMode === mode 
                     ? 'bg-purple text-white shadow-sm'
-                    : 'hover:bg-purple/10 text-gray-400'
+                    : 'hover:bg-purple/10 text-[var(--text-secondary)]'
                 }`}
-                style={{ color: searchMode === mode ? '#fff' : 'var(--text-secondary)' }}
               >
                 {mode === 'lyrics' ? 'Letra' : 'Acordes'}
               </button>
@@ -223,12 +224,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
               onKeyDown={e => e.key === 'Enter' && doSearch()}
               placeholder={searchMode === 'lyrics' ? "Nombre de la canción..." : "Nombre de la canción para acordes..."}
               className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
-              style=
-                {
-                  background: 'var(--input-bg)', 
-                  border: '1px solid var(--border-color)',
-                  color: 'var(--text-primary)',
-                }
+              style={{ background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
             />
             <input
               type="text"
@@ -237,12 +233,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
               onKeyDown={e => e.key === 'Enter' && doSearch()}
               placeholder="Artista (opcional)..."
               className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
-              style=
-                {
-                  background: 'var(--input-bg)', 
-                  border: '1px solid var(--border-color)',
-                  color: 'var(--text-primary)',
-                }
+              style={{ background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
             />
             <button
               id="external-search-btn"
