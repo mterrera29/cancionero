@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Music, Edit3, Trash2 } from 'lucide-react';
 import SongContentView from '@/components/SongContentView';
@@ -22,44 +22,49 @@ export default function SongDetailsPage() {
   const [activeTab, setActiveTab] = useState('lyrics');
   const [fontSizeLyrics, setFontSizeLyrics] = useState(16);
   const [fontSizeChords, setFontSizeChords] = useState(16);
-  const [lineHeight, setLineHeight] = useState(1.6);
+  const [lineHeight, setLineHeight] = useState(1);
   const [scrollSpeed, setScrollSpeed] = useState(0.3);
   const [delayTime, setDelayTime] = useState(0);
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
 
-  useEffect(() => {
+  // Cargar/recargar canción
+  const loadSong = useCallback(async () => {
     if (!userId) return;
-    fetch(`/api/songs/${userId}/${params.id}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        setSong(data);
-        if (data) {
-          setFontSizeLyrics(data.fontSizeLyrics ?? 16);
-          setFontSizeChords(data.fontSizeChords ?? 16);
-          setLineHeight(data.lineHeight ?? 1.6);
-          setScrollSpeed(data.scrollSpeed ?? 0.3);
-          setDelayTime(data.delayTime ?? 0);
-          if (!data.cover && data.title) {
-            fetch(`/api/spotify/search?q=${encodeURIComponent(data.title + ' ' + (data.artist || ''))}&type=track`)
-              .then(r => r.json())
-              .then(sp => {
-                const cover = sp.tracks?.[0]?.cover;
-                if (cover) {
-                  fetch(`/api/songs/${userId}/${params.id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cover }),
-                  });
-                  setSong((prev: any) => prev ? { ...prev, cover } : prev);
-                }
-              })
-              .catch(() => {});
-          }
+    setLoading(true);
+    try {
+      const r = await fetch(`/api/songs/${userId}/${params.id}`);
+      const data = r.ok ? await r.json() : null;
+      setSong(data);
+      if (data) {
+        setFontSizeLyrics(data.fontSizeLyrics ?? 16);
+        setFontSizeChords(data.fontSizeChords ?? 16);
+        setLineHeight(data.lineHeight ?? 1);
+        setScrollSpeed(data.scrollSpeed ?? 0.3);
+        setDelayTime(data.delayTime ?? 0);
+        if (!data.cover && data.title) {
+          fetch(`/api/spotify/search?q=${encodeURIComponent(data.title + ' ' + (data.artist || ''))}&type=track`)
+            .then(r => r.json())
+            .then(sp => {
+              const cover = sp.tracks?.[0]?.cover;
+              if (cover) {
+                fetch(`/api/songs/${userId}/${params.id}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ cover }),
+                });
+                setSong((prev: any) => prev ? { ...prev, cover } : prev);
+              }
+            })
+            .catch(() => {});
         }
-      })
-      .finally(() => setLoading(false));
-  }, [params.id, userId]);
+      }
+    } catch {} finally {
+      setLoading(false);
+    }
+  }, [userId, params.id]);
+
+  useEffect(() => { loadSong(); }, [loadSong]);
 
   async function deleteSong() {
     if (!userId) return;
@@ -178,7 +183,7 @@ export default function SongDetailsPage() {
             <NewSongForm
               userId={userId}
               onClose={() => setShowEdit(false)}
-              onSuccess={() => setShowEdit(false)}
+              onSuccess={() => { loadSong(); setShowEdit(false); }}
               editSong={song}
             />
           </div>

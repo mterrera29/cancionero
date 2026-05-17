@@ -52,6 +52,12 @@ body {
 }
 .animate-fade-in { animation: fadeIn 0.25s ease-out; }
 
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+.animate-slide-in { animation: slideIn 0.2s ease-out; }
+
 input::placeholder, textarea::placeholder { color: var(--text-muted) !important; }
 
 input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; }

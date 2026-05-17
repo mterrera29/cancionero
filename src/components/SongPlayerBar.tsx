@@ -31,6 +31,11 @@ export default function SongPlayerBar({
   const scrollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const delayRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const accRef = useRef(0);
+  const scrollSpeedRef = useRef(scrollSpeed);
+  const delayTimeRef = useRef(delayTime);
+
+  scrollSpeedRef.current = scrollSpeed;
+  delayTimeRef.current = delayTime;
 
   const stopAll = () => {
     setIsScrolling(false);
@@ -46,14 +51,14 @@ export default function SongPlayerBar({
     let elapsed = 0;
     delayRef.current = setInterval(() => {
       elapsed += 0.05;
-      const p = Math.min(elapsed / delayTime, 1);
+      const p = Math.min(elapsed / delayTimeRef.current, 1);
       setProgress(p);
-      if (elapsed >= delayTime) {
+      if (elapsed >= delayTimeRef.current) {
         if (delayRef.current) { clearInterval(delayRef.current); delayRef.current = null; }
         setProgress(1);
         accRef.current = 0;
         scrollRef.current = setInterval(() => {
-          accRef.current += scrollSpeed;
+          accRef.current += scrollSpeedRef.current;
           if (accRef.current >= 1) {
             const amount = Math.floor(accRef.current);
             window.scrollBy(0, amount);

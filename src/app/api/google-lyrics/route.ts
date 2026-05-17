@@ -1,5 +1,51 @@
 import { NextResponse } from 'next/server';
 
+// ── Search sources (never exposed in UI) ──
+
+async function deezerSearch(query: string): Promise<{ title: string; artist: string }[]> {
+  const res = await fetch(
+    `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=10`,
+    { headers: { 'Accept': 'application/json' } }
+  );
+  if (!res.ok) throw new Error(`search error: ${res.status}`);
+  const data = await res.json();
+  const seen = new Set<string>();
+  return (data.data || [])
+    .map((t: any) => ({
+      title: fixCase(t.title || ''),
+      artist: fixCase(t.artist?.name || ''),
+    }))
+    .filter((c: { title: string; artist: string }) => {
+      const key = `${c.title}|${c.artist}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return c.title && c.artist;
+    });
+}
+
+async function itunesSearch(query: string): Promise<{ title: string; artist: string }[]> {
+  const res = await fetch(
+    `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=10`,
+    { headers: { 'Accept': 'application/json' } }
+  );
+  if (!res.ok) throw new Error(`search error: ${res.status}`);
+  const data = await res.json();
+  const seen = new Set<string>();
+  return (data.results || [])
+    .map((t: any) => ({
+      title: fixCase(t.trackName || ''),
+      artist: fixCase(t.artistName || ''),
+    }))
+    .filter((c: { title: string; artist: string }) => {
+      const key = `${c.title}|${c.artist}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return c.title && c.artist;
+    });
+}
+
+const SOURCES = [deezerSearch, itunesSearch];
+
 function fixCase(s: string): string {
   if (s.length < 2 || /[a-z]/.test(s)) return s;
   return s.replace(/\b\w/g, c => c.toUpperCase()).replace(/\B[A-Z]/g, c => c.toLowerCase());
@@ -71,31 +117,20 @@ async function getMeta(url: string): Promise<{ title: string; artist: string } |
   } catch { return null; }
 }
 
-function normalize(s: string): string {
-  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
-}
-
-function titleMatch(query: string, title: string): boolean {
-  const nq = normalize(query);
-  const nt = normalize(title);
-  return nt === nq || nt.startsWith(nq + ' ') || nt.includes(' ' + nq + ' ') || nt.endsWith(' ' + nq) || nt.startsWith(nq);
-}
-
-async function searchCandidates(query: string): Promise<{ title: string; artist: string }[]> {
-  try {
-    const res = await fetch(`https://genius.com/api/search/song?q=${encodeURIComponent(query)}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
-    });
-    const data = await res.json();
-    const hits = data?.response?.sections?.[0]?.hits || [];
-    return hits
-      .map((h: any) => ({
-        title: fixCase(h?.result?.title || ''),
-        artist: fixCase(h?.result?.primary_artist?.name || ''),
-      }))
-      .filter((c: { title: string; artist: string }) => c.title && c.artist && titleMatch(query, c.title))
-      .slice(0, 10);
-  } catch { return []; }
+async function searchCandidates(query: string, trySource = -1): Promise<{ candidates: { title: string; artist: string }[]; hasMore: boolean }> {
+  if (trySource >= 0) {
+    // Specific source requested (from "try another" button)
+    const result = await SOURCES[trySource](query);
+    return { candidates: result, hasMore: trySource + 1 < SOURCES.length };
+  }
+  // Auto: try all sources, return first with results
+  for (let i = 0; i < SOURCES.length; i++) {
+    const result = await SOURCES[i](query);
+    if (result.length > 0) {
+      return { candidates: result, hasMore: i + 1 < SOURCES.length };
+    }
+  }
+  return { candidates: [], hasMore: false };
 }
 
 async function tryLyrics(title: string, artist: string): Promise<{ title: string; artist: string; lyrics: string } | null> {
@@ -155,8 +190,8 @@ async function fetchLyrics(searchTitle: string, searchArtist: string): Promise<{
     }
   }
 
-  // Search Genius for candidates and try each one
-  const candidates = await searchCandidates(searchTitle);
+  // Search candidates and try each one
+  const { candidates } = await searchCandidates(searchTitle);
   for (const c of candidates) {
     const result = await tryLyrics(c.title, c.artist);
     if (result) return result;
@@ -183,16 +218,16 @@ async function fetchLyrics(searchTitle: string, searchArtist: string): Promise<{
 
 export async function POST(request: Request) {
   try {
-    const { title, artist, query, mode } = await request.json();
+    const { title, artist, query, mode, try_source } = await request.json();
     if (!title && !query) return NextResponse.json({ error: 'Título requerido' }, { status: 400 });
 
     const searchTitle = title || query || '';
     const searchArtist = artist || '';
 
-    // Search mode: return multiple candidates
+    // Search mode: return multiple candidates (try_source = which source index to use, -1 = auto)
     if (mode === 'search') {
-      const candidates = await searchCandidates(searchTitle);
-      return NextResponse.json({ candidates });
+      const { candidates, hasMore } = await searchCandidates(searchTitle, try_source ?? -1);
+      return NextResponse.json({ candidates, hasMore });
     }
 
     // Normal mode: fetch lyrics directly

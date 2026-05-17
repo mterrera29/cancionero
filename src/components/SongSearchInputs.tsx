@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Link, Search } from 'lucide-react';
+import Spinner from './Spinner';
 
 interface SongSearchInputsProps {
   onSongFound: (data: { title: string; artist: string; lyrics: string; cover?: string }) => void;
@@ -21,26 +22,31 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
   const [fetchingLyrics, setFetchingLyrics] = useState(false);
   const [searchMsg, setSearchMsg] = useState('');
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [trySource, setTrySource] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
 
   function norm(s: string): string {
     return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
 
-  async function doSearch() {
+  async function doSearch(source?: number) {
     if (!searchTitle.trim()) return;
     const songTitle = searchTitle.trim();
     const songArtist = searchArtist.trim();
+    const src = source ?? trySource;
 
     setSearching(true);
     setSearchMsg('Buscando...');
-    setCandidates([]);
+    if (source === undefined) setCandidates([]);
     try {
       const res = await fetch('/api/google-lyrics', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: songTitle, mode: 'search' }),
+        body: JSON.stringify({ title: songTitle, mode: 'search', try_source: src }),
       });
       const data = await res.json();
+      setTrySource(src);
+      setHasMore(data.hasMore ?? false);
       if (data.candidates?.length > 0) {
         let filtered: Candidate[] = data.candidates;
         if (songArtist) {
@@ -61,8 +67,11 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
           setSearchMsg('❌ No se encontraron resultados');
           setTimeout(() => setSearchMsg(''), 3000);
         }
-      } else {
+      } else if (!hasMore) {
         setSearchMsg('❌ No se encontraron resultados');
+        setTimeout(() => setSearchMsg(''), 3000);
+      } else {
+        setSearchMsg('😕 Sin resultados en esta fuente');
         setTimeout(() => setSearchMsg(''), 3000);
       }
     } catch (e) {
@@ -125,75 +134,159 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
   }
 
   return (
-    <div className="space-y-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '20px' }}>
+    <div className="space-y-4 p-4 rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+      {/* Sección para pegar URL */}
       <div>
         <div className="flex gap-2">
-          <input type="text" value={scrapeUrl} onChange={e => setScrapeUrl(e.target.value)}
+          <input
+            type="text"
+            value={scrapeUrl}
+            onChange={e => setScrapeUrl(e.target.value)}
             placeholder="Pegar link de letras (Genius, Letras, etc)..."
-            className="flex-1 bg-purple-dark/80 border border-purple/30 rounded-xl px-4 py-3 text-sm text-white/70 placeholder-white/35 focus:outline-none focus:border-purple-light transition-colors"
-          />
-          <button type="button" onClick={async () => {
-            if (!scrapeUrl.trim()) return;
-            setScraping(true);
-            try {
-              const res = await fetch('/api/scrape-lyrics', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: scrapeUrl.trim() }),
-              });
-              const data = await res.json();
-              if (data.lyrics || data.title) {
-                const title = data.title || '';
-                const artist = data.artist || '';
-                const cover = await fetchSpotifyCover(title, artist);
-                onSongFound({ title, artist, lyrics: data.lyrics || '', cover });
-                setScrapeUrl('');
+            className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
+            style={
+              {
+                background: 'var(--input-bg)', 
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-primary)',
+                placeholderColor: 'var(--text-muted)',
               }
-            } catch {}
-            setScraping(false);
-          }} className="px-4 rounded-xl bg-purple hover:bg-purple-light text-white transition-colors flex items-center gap-2 text-sm">
-            {scraping ? '...' : <><Link className="w-4 h-4" /> Extraer</>}
+            }
+          />
+          <button
+            type="button"
+            onClick={async () => {
+              if (!scrapeUrl.trim()) return;
+              setScraping(true);
+              try {
+                const res = await fetch('/api/scrape-lyrics', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ url: scrapeUrl.trim() }),
+                });
+                const data = await res.json();
+                if (data.lyrics || data.title) {
+                  const title = data.title || '';
+                  const artist = data.artist || '';
+                  const cover = await fetchSpotifyCover(title, artist);
+                  onSongFound({ title, artist, lyrics: data.lyrics || '', cover });
+                  setScrapeUrl('');
+                }
+              } catch {}
+              setScraping(false);
+            }}
+            className="px-5 py-3 rounded-xl bg-purple hover:bg-purple-light text-white font-medium transition-all flex items-center gap-2 text-sm shadow-sm hover:shadow-md"
+          >
+            {scraping ? (
+              <span className="flex items-center gap-2"><Spinner size="sm" /> Extrayendo...</span>
+            ) : (
+              <><Link className="w-4 h-4" /> Extraer</>
+            )}
           </button>
         </div>
       </div>
 
-      <hr className="border-purple/20" />
+      <hr className="border-t" style={{ borderColor: 'var(--border-color)' }} />
 
-      <div className="space-y-2">
-        <div className="flex gap-2">
-          <input type="text" value={searchTitle} onChange={e => { setSearchTitle(e.target.value); setCandidates([]); }}
+      {/* Sección de búsqueda por título/artista */}
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="text"
+            value={searchTitle}
+            onChange={e => { setSearchTitle(e.target.value); setCandidates([]); setTrySource(0); setHasMore(false); }}
             onKeyDown={e => e.key === 'Enter' && doSearch()}
             placeholder="Nombre de la canción..."
-            className="flex-1 bg-purple-dark/80 border border-purple/30 rounded-xl px-4 py-3 text-sm text-white/70 placeholder-white/35 focus:outline-none focus:border-purple-light transition-colors"
+            className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
+            style={
+              {
+                background: 'var(--input-bg)', 
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-primary)',
+                placeholderColor: 'var(--text-muted)',
+              }
+            }
           />
-          <input type="text" value={searchArtist} onChange={e => setSearchArtist(e.target.value)}
+          <input
+            type="text"
+            value={searchArtist}
+            onChange={e => { setSearchArtist(e.target.value); setTrySource(0); setHasMore(false); }}
             onKeyDown={e => e.key === 'Enter' && doSearch()}
             placeholder="Artista (opcional)..."
-            className="flex-1 bg-purple-dark/80 border border-purple/30 rounded-xl px-4 py-3 text-sm text-white/70 placeholder-white/35 focus:outline-none focus:border-purple-light transition-colors"
+            className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
+            style={
+              {
+                background: 'var(--input-bg)', 
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-primary)',
+                placeholderColor: 'var(--text-muted)',
+              }
+            }
           />
-          <button id="external-search-btn" type="button" onClick={doSearch}
-            className="px-4 rounded-xl bg-purple hover:bg-purple-light text-white transition-colors flex items-center gap-2 text-sm shrink-0">
-            {searching || fetchingLyrics ? '...' : <><Search className="w-4 h-4" /> Buscar</>}
+          <button
+            id="external-search-btn"
+            type="button"
+            onClick={() => doSearch()}
+            className="px-5 py-3 rounded-xl bg-purple hover:bg-purple-light text-white font-medium transition-all flex items-center justify-center gap-2 text-sm shadow-sm hover:shadow-md"
+            disabled={searching || fetchingLyrics}
+          >
+            {searching || fetchingLyrics ? (
+              <span className="flex items-center gap-2"><Spinner size="sm" /> Buscando...</span>
+            ) : (
+              <><Search className="w-4 h-4" /> Buscar</>
+            )}
           </button>
         </div>
+
+        {/* Mensajes de estado */}
         {searchMsg && (
-          <p className="text-xs text-center" style={{ color: searchMsg.includes('✅') ? '#4ade80' : '#f87171' }}>
+          <div className={`text-sm text-center font-medium ${searchMsg.includes('✅') ? 'text-green-500' : searchMsg.includes('❌') ? 'text-red-400' : 'text-blue-400'}`}>
             {searchMsg}
-          </p>
+          </div>
         )}
+
+        {/* Resultados de búsqueda */}
         {candidates.length > 0 && (
-          <div className="space-y-1 pt-1">
+          <div className="space-y-2 pt-2 animate-fade-in">
             {candidates.map((c, i) => (
-              <button key={i} type="button" onClick={() => selectCandidate(c)}
-                className="w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors hover:bg-purple/20"
-                style={{ border: '1px solid var(--border-color)' }}>
-                <Search className="w-3.5 h-3.5 shrink-0 text-purple-pastel" />
+              <button
+                key={i}
+                type="button"
+                onClick={() => selectCandidate(c)}
+                className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-purple/10"
+                style={{ border: '1px solid var(--border-color)' }}
+              >
+                <Search className="w-4 h-4 shrink-0 text-purple-pastel" />
                 <div className="min-w-0">
                   <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{c.title}</span>
                   <span className="text-xs ml-2" style={{ color: 'var(--text-secondary)' }}>{c.artist}</span>
                 </div>
               </button>
             ))}
+            {hasMore && (
+              <button
+                type="button"
+                onClick={() => doSearch(trySource + 1)}
+                className="w-full text-center text-sm py-2.5 rounded-xl transition-all hover:bg-purple/5"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                ¿No encontraste lo que buscabas? Buscar en otra fuente
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Fallback cuando no hay resultados pero hay más fuentes */}
+        {candidates.length === 0 && hasMore && (
+          <div className="pt-2 text-center animate-fade-in">
+            <button
+              type="button"
+              onClick={() => doSearch(trySource + 1)}
+              className="text-sm py-2.5 px-5 rounded-xl transition-all hover:bg-purple/5"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              Buscar en otra fuente
+            </button>
           </div>
         )}
       </div>

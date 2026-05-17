@@ -30,76 +30,112 @@ export default function Header({ onSongAdded }: HeaderProps) {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40" style={{ background: 'var(--header-bg)', borderBottom: '1px solid var(--border-color)' }}>
-      <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between relative">
+    <header className="sticky top-0 z-40 w-full" style={{ background: 'var(--header-bg)', borderBottom: '1px solid var(--border-color)' }}>
+      <div className="px-4 sm:px-6 h-16 flex items-center justify-between relative w-full">
+        {/* Menú hamburguesa (izquierda) */}
         <div className="flex items-center">
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex flex-col items-center justify-center w-10 h-10 gap-1 rounded-lg hover:bg-purple/20 transition-colors"
+              className="flex flex-col items-center justify-center w-10 h-10 gap-1.5 rounded-lg hover:bg-purple/20 transition-colors p-2"
             >
-              <span className={`w-5 h-0.5 rounded-full transition-all ${isMenuOpen ? 'rotate-45 translate-y-[6px]' : ''}`} style={{ background: 'var(--text-primary)' }} />
-              <span className={`w-5 h-0.5 rounded-full transition-all ${isMenuOpen ? 'opacity-0' : ''}`} style={{ background: 'var(--text-primary)' }} />
-              <span className={`w-5 h-0.5 rounded-full transition-all ${isMenuOpen ? '-rotate-45 -translate-y-[6px]' : ''}`} style={{ background: 'var(--text-primary)' }} />
+              <span className={`w-6 h-0.5 rounded-full transition-all ${isMenuOpen ? 'rotate-45 translate-y-[4px]' : ''}`} style={{ background: 'var(--text-primary)' }} />
+              <span className={`w-6 h-0.5 rounded-full transition-all ${isMenuOpen ? 'opacity-0' : ''}`} style={{ background: 'var(--text-primary)' }} />
+              <span className={`w-6 h-0.5 rounded-full transition-all ${isMenuOpen ? '-rotate-45 -translate-y-[4px]' : ''}`} style={{ background: 'var(--text-primary)' }} />
             </button>
 
+            {/* Menú lateral (mobile-first) */}
             {isMenuOpen && (
-              <div className="absolute top-full left-0 mt-2 min-w-[200px] py-2 rounded-xl shadow-2xl animate-fade-in overflow-hidden" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
-                <button
-                  onClick={() => { router.push('/'); setIsMenuOpen(false); }}
-                  className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-purple/20 transition-colors text-left"
-                >
-                  <Music className="w-5 h-5 text-purple-pastel" />
-                  <span style={{ color: 'var(--text-primary)' }} className="font-medium">Mis Canciones</span>
-                </button>
-                <button
-                  onClick={() => { router.push('/lists'); setIsMenuOpen(false); }}
-                  className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-purple/20 transition-colors text-left"
-                >
-                  <ListMusic className="w-5 h-5 text-purple-pastel" />
-                  <span style={{ color: 'var(--text-primary)' }} className="font-medium">Mis Listas</span>
-                </button>
+              <div className="fixed inset-0 z-40 flex">
+                {/* Overlay */}
+                <div className="fixed inset-0 bg-black/50" onClick={() => setIsMenuOpen(false)}></div>
+
+                {/* Menú lateral */}
+                 <div className="relative w-64 h-full animate-slide-in" style={{ background: 'var(--bg-secondary)', borderRight: '1px solid var(--border-color)' }}>
+                   <div className="p-4 border-b border-purple/20">
+                     <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>🔥 Cancionero 🎸</h2>
+                   </div>
+                   <div className="p-4 space-y-1">
+                     <button
+                       onClick={() => { router.push('/'); setIsMenuOpen(false); }}
+                       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-purple/10 transition-colors text-left"
+                     >
+                       <Music className="w-5 h-5 text-purple-pastel" />
+                       <span style={{ color: 'var(--text-primary)' }} className="font-medium">Mis Canciones</span>
+                     </button>
+                     <button
+                       onClick={() => { router.push('/lists'); setIsMenuOpen(false); }}
+                       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-purple/10 transition-colors text-left"
+                     >
+                       <ListMusic className="w-5 h-5 text-purple-pastel" />
+                       <span style={{ color: 'var(--text-primary)' }} className="font-medium">Mis Listas</span>
+                     </button>
+
+                     {/* Separador */}
+                     {userId && <div className="pt-2 pb-1"><div className="h-px" style={{ background: 'var(--border-color)' }}></div></div>}
+
+                     {/* Botón Nueva Canción (en el menú) */}
+                     {userId && (
+                       <button
+                         onClick={() => { setIsModalOpen(true); setIsMenuOpen(false); }}
+                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-purple hover:bg-purple-light text-white transition-colors text-left font-medium"
+                       >
+                         <Plus className="w-5 h-5" />
+                         <span>Nueva Canción</span>
+                       </button>
+                     )}
+
+                     {/* Separador */}
+                     <div className="pt-2 pb-1"><div className="h-px" style={{ background: 'var(--border-color)' }}></div></div>
+
+                     {/* Theme Toggle (en el menú) */}
+                     <div className="flex items-center justify-between px-4 py-3">
+                       <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Tema oscuro</span>
+                       <ThemeToggle />
+                     </div>
+                   </div>
+                 </div>
               </div>
             )}
           </div>
         </div>
 
+        {/* Logo (centrado) */}
         <h1
-          className="text-xl font-bold cursor-pointer select-none absolute left-1/2 -translate-x-1/2 whitespace-nowrap"
+          className="text-xl font-bold cursor-pointer select-none whitespace-nowrap"
           style={{ color: 'var(--text-primary)' }}
           onClick={() => router.push('/')}
         >
           🔥 Cancionero 🎸
         </h1>
 
+        {/* Usuario y acciones (derecha) */}
         <div className="flex items-center gap-2">
-          <ThemeToggle />
           {user ? (
-            <>
-              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-purple-dark/40 border border-purple/20">
+            <div className="flex items-center gap-2">
+              {/* Usuario y cerrar sesión */}
+              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl hover:bg-white/5 transition-colors">
                 {user.photoURL ? (
-                  <img src={user.photoURL} alt="" className="w-6 h-6 rounded-full" />
+                  <img src={user.photoURL} alt="" className="w-8 h-8 rounded-full border-2 border-purple/30" />
                 ) : (
-                  <UserIcon className="w-4 h-4 text-purple-pastel" />
+                  <UserIcon className="w-6 h-6 text-purple-pastel" />
                 )}
-                <span className="text-xs text-white/60 hidden sm:block max-w-20 truncate">{user.displayName || user.email}</span>
+                <button
+                  onClick={logout}
+                  className="p-1.5 rounded-lg hover:bg-purple/20 transition-colors"
+                  title="Cerrar sesión"
+                >
+                  <LogOut className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+                </button>
               </div>
-              <button onClick={() => setIsModalOpen(true)}
-                className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white font-medium px-5 py-2.5 rounded-xl transition-all"
-              >
-                <Plus className="w-4 h-4" />
-                Nueva
-              </button>
-              <button onClick={logout} className="p-2.5 rounded-xl hover:bg-purple/20 transition-colors" title="Cerrar sesión">
-                <LogOut className="w-4 h-4 text-white/60" />
-              </button>
-            </>
+            </div>
           ) : (
-            <button onClick={login}
-              className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white font-medium px-5 py-2.5 rounded-xl transition-all"
+            <button
+              onClick={login}
+              className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white font-medium px-5 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md"
             >
               <LogIn className="w-4 h-4" />
-              Ingresar
+              <span className="hidden sm:block">Ingresar</span>
             </button>
           )}
         </div>
