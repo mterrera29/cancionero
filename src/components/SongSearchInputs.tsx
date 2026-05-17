@@ -242,6 +242,20 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
         {searchMsg && (
           <div className={`text-sm text-center font-medium ${searchMsg.includes('✅') ? 'text-green-500' : searchMsg.includes('❌') ? 'text-red-400' : 'text-blue-400'}`}>
             {searchMsg}
+            {/* Botón para buscar en Cifra Club si no se encontraron acordes */}
+            {searchMsg.includes('No se encontraron') && searchMode === 'chords' && (
+              <div className="mt-3 text-center">
+                <a
+                  href={`https://www.cifraclub.com.br/search.php?search=${encodeURIComponent(`${searchTitle} ${searchArtist}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors text-sm"
+                >
+                  <Search className="w-4 h-4" />
+                  Buscar en Cifra Club
+                </a>
+              </div>
+            )}
           </div>
         )}
 
