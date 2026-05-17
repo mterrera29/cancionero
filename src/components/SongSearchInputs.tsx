@@ -190,52 +190,74 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
 
       {/* Sección de búsqueda por título/artista */}
       <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row gap-2">
-          <input
-            type="text"
-            value={searchTitle}
-            onChange={e => { setSearchTitle(e.target.value); setCandidates([]); setTrySource(0); setHasMore(false); }}
-            onKeyDown={e => e.key === 'Enter' && doSearch()}
-            placeholder="Nombre de la canción..."
-            className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
-            style={
-              {
-                background: 'var(--input-bg)', 
-                border: '1px solid var(--border-color)',
-                color: 'var(--text-primary)',
-
-              }
-            }
-          />
-          <input
-            type="text"
-            value={searchArtist}
-            onChange={e => { setSearchArtist(e.target.value); setTrySource(0); setHasMore(false); }}
-            onKeyDown={e => e.key === 'Enter' && doSearch()}
-            placeholder="Artista (opcional)..."
-            className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
-            style={
-              {
-                background: 'var(--input-bg)', 
-                border: '1px solid var(--border-color)',
-                color: 'var(--text-primary)',
-
-              }
-            }
-          />
-          <button
-            id="external-search-btn"
-            type="button"
-            onClick={() => doSearch()}
-            className="px-5 py-3 rounded-xl bg-purple hover:bg-purple-light text-white font-medium transition-all flex items-center justify-center gap-2 text-sm shadow-sm hover:shadow-md"
-            disabled={searching || fetchingLyrics}
-          >
-            {searching || fetchingLyrics ? (
-              <span className="flex items-center gap-2"><Spinner size="sm" /> Buscando...</span>
-            ) : (
-              <><Search className="w-4 h-4" /> Buscar</>
-            )}
-          </button>
+        <div className="flex flex-col sm:flex-row gap-2 items-center">
+          {/* Selector de modo: Letra o Acordes */}
+          <div className="flex gap-1 sm:gap-2">
+            {(['lyrics', 'chords'] as const).map(mode => (
+              <button
+                key={mode}
+                onClick={() => {
+                  setSearchMode(mode); 
+                  setCandidates([]); 
+                  setSearchMsg(''); 
+                  setTrySource(0); 
+                  setHasMore(false);
+                }}
+                className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                  searchMode === mode 
+                    ? 'bg-purple text-white shadow-sm'
+                    : 'hover:bg-purple/10 text-gray-400'
+                }`}
+                style={{ color: searchMode === mode ? '#fff' : 'var(--text-secondary)' }}
+              >
+                {mode === 'lyrics' ? 'Letra' : 'Acordes'}
+              </button>
+            ))}
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-2 flex-1">
+            <input
+              type="text"
+              value={searchTitle}
+              onChange={e => { setSearchTitle(e.target.value); setCandidates([]); setTrySource(0); setHasMore(false); }}
+              onKeyDown={e => e.key === 'Enter' && doSearch()}
+              placeholder={searchMode === 'lyrics' ? "Nombre de la canción..." : "Nombre de la canción para acordes..."}
+              className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
+              style=
+                {
+                  background: 'var(--input-bg)', 
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-primary)',
+                }
+            />
+            <input
+              type="text"
+              value={searchArtist}
+              onChange={e => { setSearchArtist(e.target.value); setTrySource(0); setHasMore(false); }}
+              onKeyDown={e => e.key === 'Enter' && doSearch()}
+              placeholder="Artista (opcional)..."
+              className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
+              style=
+                {
+                  background: 'var(--input-bg)', 
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-primary)',
+                }
+            />
+            <button
+              id="external-search-btn"
+              type="button"
+              onClick={() => doSearch()}
+              className="px-5 py-3 rounded-xl bg-purple hover:bg-purple-light text-white font-medium transition-all flex items-center justify-center gap-2 text-sm shadow-sm hover:shadow-md"
+              disabled={searching || fetchingLyrics}
+            >
+              {searching || fetchingLyrics ? (
+                <span className="flex items-center gap-2"><Spinner size="sm" /> Buscando...</span>
+              ) : (
+                <><Search className="w-4 h-4" /> Buscar</>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mensajes de estado */}
