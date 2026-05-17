@@ -181,7 +181,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
             style={{ minWidth: '110px' }}
           >
             {scraping ? (
-              <span className="flex items-center gap-2"><Spinner size="sm" /> Extrayendo...</span>
+              <span className="flex items-center gap-2"><Spinner size="sm" inline /> Extrayendo...</span>
             ) : (
               <><Link className="w-4 h-4" /> Extraer</>
             )}
@@ -232,7 +232,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
               style={{ minWidth: '100px' }}
             >
               {searching || fetchingLyrics ? (
-                <span className="flex items-center gap-2"><Spinner size="sm" /> Buscando...</span>
+                <span className="flex items-center gap-2"><Spinner size="sm" inline /> Buscando...</span>
               ) : (
                 <><Search className="w-4 h-4" /> Buscar</>
               )}

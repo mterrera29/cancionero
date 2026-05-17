@@ -194,7 +194,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
                 disabled={!!fetching}
                 className="text-xs text-purple hover:text-purple-light transition-colors flex items-center gap-1 font-medium"
               >
-                {fetching === 'lyrics' ? <Spinner size="sm" /> : '+ Buscar letra'}
+                {fetching === 'lyrics' ? <Spinner size="sm" inline /> : '+ Buscar letra'}
               </button>
             )}
           </div>
@@ -222,7 +222,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
                 disabled={!!fetching}
                 className="text-xs text-purple hover:text-purple-light transition-colors flex items-center gap-1 font-medium"
               >
-                {fetching === 'chords' ? <Spinner size="sm" /> : '+ Buscar acordes'}
+                {fetching === 'chords' ? <Spinner size="sm" inline /> : '+ Buscar acordes'}
               </button>
             )}
           </div>
@@ -247,7 +247,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
            className="flex-1 flex items-center justify-center gap-2 bg-purple hover:bg-purple-light text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
          >
            {loading ? (
-             <><Spinner size="sm" /> Guardando...</>
+              <><Spinner size="sm" inline /> Guardando...</>
            ) : (
              <><Save className="w-4 h-4" /> Guardar</>
            )}
