@@ -60,6 +60,14 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
           const na = norm(songArtist);
           filtered = filtered.filter(c => norm(c.artist).includes(na));
         }
+        // Filtrar candidatos cuyo título no contenga NINGUNA palabra de la búsqueda
+        const searchWords = norm(songTitle).split(/\s+/).filter(Boolean);
+        if (searchWords.length > 0) {
+          filtered = filtered.filter(c => {
+            const ct = norm(c.title);
+            return searchWords.some(w => ct.includes(w));
+          });
+        }
         if (filtered.length > 0) {
           setCandidates(filtered);
           setSearchMsg(filtered.length === 1

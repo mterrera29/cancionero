@@ -310,7 +310,15 @@ export async function POST(request: Request) {
     // Search mode: return multiple candidates (try_source = which source index to use, -1 = auto)
     if (mode === 'search') {
       const { candidates, hasMore } = await searchCandidates(searchTitle, try_source ?? -1);
-      return NextResponse.json({ candidates, hasMore });
+      // Filtrar candidatos cuyo título no contenga ninguna palabra de la búsqueda
+      const searchWords = searchTitle.toLowerCase().split(/\s+/).filter(Boolean);
+      const filtered = searchWords.length > 0
+        ? candidates.filter(c => {
+            const ct = c.title.toLowerCase();
+            return searchWords.some((w: string) => ct.includes(w));
+          })
+        : candidates;
+      return NextResponse.json({ candidates: filtered, hasMore: filtered.length > 0 ? hasMore : false });
     }
 
     // Chord mode: fetch chords
