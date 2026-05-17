@@ -10,7 +10,7 @@ interface NewSongFormProps {
   onClose: () => void;
   onSuccess?: () => void;
   editSong?: Song;
-  initialData?: { title?: string; artist?: string; lyrics?: string; cover?: string };
+  initialData?: { title?: string; artist?: string; lyrics?: string; chords?: string; cover?: string };
 }
 
 export default function NewSongForm({ userId, onClose, onSuccess, editSong, initialData }: NewSongFormProps) {
@@ -46,6 +46,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
         artist: initialData.artist || prev.artist,
         cover: initialData.cover || prev.cover,
         lyrics: initialData.lyrics || prev.lyrics,
+        chords: initialData.chords || prev.chords,
       }));
     }
   }, [editSong, initialData]);
