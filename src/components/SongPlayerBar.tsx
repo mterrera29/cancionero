@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Play, Square, Plus, Minus, Save, AlignLeft, Columns } from 'lucide-react';
+import { Play, Square, Plus, Minus, Save, AlignLeft, List, Columns } from 'lucide-react';
 
 interface SongPlayerBarProps {
   fontSizeLyrics: number;
@@ -10,8 +10,8 @@ interface SongPlayerBarProps {
   setFontSizeChords: (n: number) => void;
   lineHeight: number;
   setLineHeight: (n: number) => void;
-  columns: number;
-  setColumns: (n: number) => void;
+  displayMode: 'vertical' | 'horizontal';
+  setDisplayMode: (m: 'vertical' | 'horizontal') => void;
   scrollSpeed: number;
   setScrollSpeed: (n: number) => void;
   delayTime: number;
@@ -22,7 +22,7 @@ interface SongPlayerBarProps {
 
 export default function SongPlayerBar({
   fontSizeLyrics, fontSizeChords, setFontSizeLyrics, setFontSizeChords, lineHeight, setLineHeight,
-  columns, setColumns,
+  displayMode, setDisplayMode,
   scrollSpeed, setScrollSpeed, delayTime, setDelayTime, activeTab, onSave,
 }: SongPlayerBarProps) {
   const minSpeed = 0.1;
@@ -132,16 +132,20 @@ export default function SongPlayerBar({
 
         <div className="w-px h-6" style={{ background: 'var(--border-color)' }} />
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <button
-            onClick={() => setColumns(columns === 3 ? 1 : columns + 1)}
-            className="p-1.5 rounded-lg hover:bg-purple/20 transition-colors relative"
-            title={`${columns} columna${columns > 1 ? 's' : ''}`}
+            onClick={() => setDisplayMode('vertical')}
+            className={`p-1.5 rounded-lg transition-colors ${displayMode === 'vertical' ? 'bg-purple/20' : 'hover:bg-purple/20'}`}
+            title="Vertical (una columna)"
           >
-            <Columns className="w-3.5 h-3.5" style={{ color: 'var(--text-secondary)' }} />
-            <span className="absolute -top-1 -right-1 text-[9px] font-bold" style={{ color: 'var(--text-muted)' }}>
-              {columns}
-            </span>
+            <List className="w-3.5 h-3.5" style={{ color: displayMode === 'vertical' ? 'var(--purple-pastel)' : 'var(--text-secondary)' }} />
+          </button>
+          <button
+            onClick={() => setDisplayMode('horizontal')}
+            className={`p-1.5 rounded-lg transition-colors ${displayMode === 'horizontal' ? 'bg-purple/20' : 'hover:bg-purple/20'}`}
+            title="Horizontal (columnas automáticas)"
+          >
+            <Columns className="w-3.5 h-3.5" style={{ color: displayMode === 'horizontal' ? 'var(--purple-pastel)' : 'var(--text-secondary)' }} />
           </button>
         </div>
 

@@ -23,7 +23,7 @@ export default function SongDetailsPage() {
   const [fontSizeLyrics, setFontSizeLyrics] = useState(14);
   const [fontSizeChords, setFontSizeChords] = useState(14);
   const [lineHeight, setLineHeight] = useState(1);
-  const [columns, setColumns] = useState(1);
+  const [displayMode, setDisplayMode] = useState<'vertical' | 'horizontal'>('vertical');
   const [scrollSpeed, setScrollSpeed] = useState(0.3);
   const [delayTime, setDelayTime] = useState(0);
   const [showEdit, setShowEdit] = useState(false);
@@ -41,7 +41,7 @@ export default function SongDetailsPage() {
         setFontSizeLyrics(data.fontSizeLyrics ?? 14);
         setFontSizeChords(data.fontSizeChords ?? 14);
         setLineHeight(data.lineHeight ?? 1);
-        setColumns(data.columns ?? 1);
+        setDisplayMode(data.displayMode ?? 'vertical');
         setScrollSpeed(data.scrollSpeed ?? 0.3);
         setDelayTime(data.delayTime ?? 0);
         if (!data.cover && data.title) {
@@ -83,7 +83,7 @@ export default function SongDetailsPage() {
         fontSizeLyrics,
         fontSizeChords,
         lineHeight,
-        columns,
+        displayMode,
         scrollSpeed,
         delayTime,
       }),
@@ -116,7 +116,7 @@ export default function SongDetailsPage() {
         <ArrowLeft className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
       </button>
 
-      <div className={`mx-auto px-6 py-8 animate-fade-in ${columns === 3 ? 'w-full' : 'max-w-3xl'}`}>
+      <div className={`mx-auto px-6 py-8 animate-fade-in ${displayMode === 'horizontal' ? 'w-full' : 'max-w-3xl'}`}>
         <div className="flex items-start gap-5 mb-8">
           {song.cover ? (
             <img src={song.cover} alt="" className="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-lg" />
@@ -167,7 +167,7 @@ export default function SongDetailsPage() {
           activeTab={activeTab}
           fontSize={activeTab === 'lyrics' ? fontSizeLyrics : fontSizeChords}
           lineHeight={lineHeight}
-          columns={columns}
+          displayMode={displayMode}
         />
       </div>
 
@@ -178,8 +178,8 @@ export default function SongDetailsPage() {
         setFontSizeChords={setFontSizeChords}
         lineHeight={lineHeight}
         setLineHeight={setLineHeight}
-        columns={columns}
-        setColumns={setColumns}
+        displayMode={displayMode}
+        setDisplayMode={setDisplayMode}
         scrollSpeed={scrollSpeed}
         setScrollSpeed={setScrollSpeed}
         delayTime={delayTime}
