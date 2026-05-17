@@ -193,28 +193,15 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
       {/* Sección de búsqueda por título/artista */}
       <div className="space-y-3">
         <div className="flex gap-2 items-center">
-          {/* Selector de modo: Letra o Acordes */}
-          <div className="flex gap-1 shrink-0">
-            {(['lyrics', 'chords'] as const).map(mode => (
-              <button
-                key={mode}
-                onClick={() => {
-                  setSearchMode(mode); 
-                  setCandidates([]); 
-                  setSearchMsg(''); 
-                  setTrySource(0); 
-                  setHasMore(false);
-                }}
-                className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                  searchMode === mode 
-                    ? 'bg-purple text-white shadow-sm'
-                    : 'hover:bg-purple/10 text-[var(--text-secondary)]'
-                }`}
-              >
-                {mode === 'lyrics' ? 'Letra' : 'Acordes'}
-              </button>
-            ))}
-          </div>
+          <select
+            value={searchMode}
+            onChange={e => { setSearchMode(e.target.value as SearchMode); setCandidates([]); setSearchMsg(''); setTrySource(0); setHasMore(false); }}
+            className="shrink-0 rounded-xl px-3 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all appearance-none"
+            style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+          >
+            <option value="lyrics" style={{ background: 'var(--bg-card)' }}>Letra</option>
+            <option value="chords" style={{ background: 'var(--bg-card)' }}>Acordes</option>
+          </select>
           
           <div className="flex flex-1 min-w-0 flex-wrap gap-2">
             <input
@@ -222,7 +209,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
               value={searchTitle}
               onChange={e => { setSearchTitle(e.target.value); setCandidates([]); setTrySource(0); setHasMore(false); }}
               onKeyDown={e => e.key === 'Enter' && doSearch()}
-              placeholder={searchMode === 'lyrics' ? "Nombre de la canción..." : "Nombre de la canción para acordes..."}
+              placeholder="Nombre de la canción..."
               className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
               style={{ background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
             />

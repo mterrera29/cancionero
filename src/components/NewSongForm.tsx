@@ -15,6 +15,7 @@ interface NewSongFormProps {
 
 export default function NewSongForm({ userId, onClose, onSuccess, editSong, initialData }: NewSongFormProps) {
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState<'lyrics' | 'chords' | null>(null);
 
   // Estado inicial con valores por defecto
   const [formData, setFormData] = useState({
@@ -50,6 +51,24 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
       }));
     }
   }, [editSong, initialData]);
+
+  const fetchMissing = async (mode: 'lyrics' | 'chords') => {
+    setFetching(mode);
+    try {
+      const res = await fetch('/api/google-lyrics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: formData.title, artist: formData.artist, search_mode: mode }),
+      });
+      const data = await res.json();
+      const field = mode === 'lyrics' ? 'lyrics' : 'chords';
+      if (data[field]) {
+        setFormData(prev => ({ ...prev, [field]: data[field] }));
+      }
+    } finally {
+      setFetching(null);
+    }
+  };
 
   return (
      <form onSubmit={async (e) => {
@@ -164,10 +183,22 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
          </div>
        )}
 
-       {/* Letra */}
-       <div>
-         <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Letra</label>
-         <textarea
+        {/* Letra */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Letra</label>
+            {formData.chords && !formData.lyrics && formData.title && formData.artist && (
+              <button
+                type="button"
+                onClick={() => fetchMissing('lyrics')}
+                disabled={!!fetching}
+                className="text-xs text-purple hover:text-purple-light transition-colors flex items-center gap-1 font-medium"
+              >
+                {fetching === 'lyrics' ? <Spinner size="sm" /> : '+ Buscar letra'}
+              </button>
+            )}
+          </div>
+          <textarea
            value={formData.lyrics}
            onChange={(e) => setFormData({ ...formData, lyrics: e.target.value })}
            className="w-full rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all min-h-[140px] resize-none"
@@ -180,10 +211,22 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
          />
        </div>
 
-       {/* Acordes */}
-       <div>
-         <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Acordes</label>
-         <textarea
+        {/* Acordes */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Acordes</label>
+            {formData.lyrics && !formData.chords && formData.title && formData.artist && (
+              <button
+                type="button"
+                onClick={() => fetchMissing('chords')}
+                disabled={!!fetching}
+                className="text-xs text-purple hover:text-purple-light transition-colors flex items-center gap-1 font-medium"
+              >
+                {fetching === 'chords' ? <Spinner size="sm" /> : '+ Buscar acordes'}
+              </button>
+            )}
+          </div>
+          <textarea
            value={formData.chords}
            onChange={(e) => setFormData({ ...formData, chords: e.target.value })}
            className="w-full rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all min-h-[100px] resize-none"
