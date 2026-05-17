@@ -23,6 +23,7 @@ export default function SongDetailsPage() {
   const [fontSizeLyrics, setFontSizeLyrics] = useState(14);
   const [fontSizeChords, setFontSizeChords] = useState(14);
   const [lineHeight, setLineHeight] = useState(1);
+  const [columns, setColumns] = useState(1);
   const [scrollSpeed, setScrollSpeed] = useState(0.3);
   const [delayTime, setDelayTime] = useState(0);
   const [showEdit, setShowEdit] = useState(false);
@@ -40,6 +41,7 @@ export default function SongDetailsPage() {
         setFontSizeLyrics(data.fontSizeLyrics ?? 14);
         setFontSizeChords(data.fontSizeChords ?? 14);
         setLineHeight(data.lineHeight ?? 1);
+        setColumns(data.columns ?? 1);
         setScrollSpeed(data.scrollSpeed ?? 0.3);
         setDelayTime(data.delayTime ?? 0);
         if (!data.cover && data.title) {
@@ -81,6 +83,7 @@ export default function SongDetailsPage() {
         fontSizeLyrics,
         fontSizeChords,
         lineHeight,
+        columns,
         scrollSpeed,
         delayTime,
       }),
@@ -164,6 +167,7 @@ export default function SongDetailsPage() {
           activeTab={activeTab}
           fontSize={activeTab === 'lyrics' ? fontSizeLyrics : fontSizeChords}
           lineHeight={lineHeight}
+          columns={columns}
         />
       </div>
 
@@ -174,6 +178,8 @@ export default function SongDetailsPage() {
         setFontSizeChords={setFontSizeChords}
         lineHeight={lineHeight}
         setLineHeight={setLineHeight}
+        columns={columns}
+        setColumns={setColumns}
         scrollSpeed={scrollSpeed}
         setScrollSpeed={setScrollSpeed}
         delayTime={delayTime}
