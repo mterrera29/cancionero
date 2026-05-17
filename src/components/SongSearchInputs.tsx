@@ -149,7 +149,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
                 background: 'var(--input-bg)', 
                 border: '1px solid var(--border-color)',
                 color: 'var(--text-primary)',
-                placeholderColor: 'var(--text-muted)',
+
               }
             }
           />
@@ -203,7 +203,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
                 background: 'var(--input-bg)', 
                 border: '1px solid var(--border-color)',
                 color: 'var(--text-primary)',
-                placeholderColor: 'var(--text-muted)',
+
               }
             }
           />
@@ -219,7 +219,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
                 background: 'var(--input-bg)', 
                 border: '1px solid var(--border-color)',
                 color: 'var(--text-primary)',
-                placeholderColor: 'var(--text-muted)',
+
               }
             }
           />
