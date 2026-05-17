@@ -116,7 +116,7 @@ export default function SongDetailsPage() {
         <ArrowLeft className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
       </button>
 
-      <div className="max-w-3xl mx-auto px-6 py-8 animate-fade-in">
+      <div className={`mx-auto px-6 py-8 animate-fade-in ${columns === 3 ? 'w-full' : 'max-w-3xl'}`}>
         <div className="flex items-start gap-5 mb-8">
           {song.cover ? (
             <img src={song.cover} alt="" className="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-lg" />
