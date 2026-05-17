@@ -56,24 +56,33 @@ function HorizontalView({ lines, fontSize, lineHeight }: { lines: string[]; font
     if (!el) return;
 
     const resize = () => {
-      // Altura disponible: vh menos espacio del header/tabs y bottom bar
-      const availableH = window.innerHeight - 280; // padding + header + tabs + bottom bar
+      const parent = el.parentElement;
+      if (!parent) return;
+      const availableH = parent.clientHeight;
       const lineH = fontSize * lineHeight + 12; // fontSize * lineHeight + padding vertical
       const itemsPerCol = Math.max(1, Math.floor(availableH / lineH));
+
+      el.style.height = `${availableH}px`;
+
+      if (lines.length <= itemsPerCol) {
+        // Entra todo en una columna
+        el.style.columnCount = '1';
+        el.style.columnWidth = 'auto';
+        return;
+      }
+
       const totalCols = Math.ceil(lines.length / itemsPerCol);
 
       // Ancho de columna basado en el contenido más largo
       let maxW = 220;
-      // Estimación: ~0.6 * fontSize por caracter
       lines.forEach(l => {
-        const w = l.length * fontSize * 0.55 + 32; // 32px de padding lateral
+        const w = l.length * fontSize * 0.55 + 32;
         if (w > maxW) maxW = w;
       });
-      maxW = Math.min(maxW, 400); // cap
+      maxW = Math.min(maxW, 400);
 
       el.style.columnCount = String(totalCols);
       el.style.columnWidth = `${maxW}px`;
-      el.style.height = `${itemsPerCol * lineH}px`;
     };
 
     resize();
@@ -91,7 +100,6 @@ function HorizontalView({ lines, fontSize, lineHeight }: { lines: string[]; font
         columnFill: 'auto',
         columnGap: '2rem',
         columnRule: '1px solid var(--border-color)',
-        paddingBottom: '1rem',
       }}
     >
       {lines.map((line, i) => (

@@ -105,7 +105,7 @@ export default function SongDetailsPage() {
   }
 
   return (
-    <main className="min-h-screen pb-20" style={{ background: 'var(--bg-primary)' }}>
+    <main className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
       {/* Flecha volver flotante */}
       <button
         onClick={() => router.push('/')}
@@ -116,60 +116,75 @@ export default function SongDetailsPage() {
         <ArrowLeft className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
       </button>
 
-      <div className={`mx-auto px-6 py-8 animate-fade-in ${displayMode === 'horizontal' ? 'w-full' : 'max-w-3xl'}`}>
-        <div className="flex items-start gap-5 mb-8">
-          {song.cover ? (
-            <img src={song.cover} alt="" className="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-lg" />
-          ) : (
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple to-purple-light flex items-center justify-center shrink-0 shadow-lg">
-              <Music className="w-8 h-8 text-white/60" />
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <h1 className="text-2xl font-bold mb-1 truncate" style={{ color: 'var(--text-primary)' }}>{song.title}</h1>
-                <p className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{song.artist}</p>
+      {displayMode === 'horizontal' ? (
+        /* ── Modo horizontal: pantalla completa, sin header/tabs ── */
+        <div className="w-full" style={{ height: 'calc(100vh - 72px)' }}>
+          <SongContentView
+            lyrics={song.lyrics}
+            chords={song.chords}
+            activeTab={activeTab}
+            fontSize={activeTab === 'lyrics' ? fontSizeLyrics : fontSizeChords}
+            lineHeight={lineHeight}
+            displayMode={displayMode}
+          />
+        </div>
+      ) : (
+        /* ── Modo vertical: layout con header y tabs ── */
+        <div className="max-w-3xl mx-auto px-6 pb-24 pt-20 animate-fade-in">
+          <div className="flex items-start gap-5 mb-8">
+            {song.cover ? (
+              <img src={song.cover} alt="" className="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-lg" />
+            ) : (
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple to-purple-light flex items-center justify-center shrink-0 shadow-lg">
+                <Music className="w-8 h-8 text-white/60" />
               </div>
-              <div className="flex gap-1 shrink-0">
-                <button onClick={() => setShowEdit(true)} className="p-2 rounded-xl hover:bg-purple/20 transition-colors" title="Editar">
-                  <Edit3 className="w-4 h-4 text-purple-pastel" />
-                </button>
-                <button onClick={() => setShowDelete(true)} className="p-2 rounded-xl hover:bg-red-500/10 transition-colors" title="Eliminar">
-                  <Trash2 className="w-4 h-4 text-red-400" />
-                </button>
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <h1 className="text-2xl font-bold mb-1 truncate" style={{ color: 'var(--text-primary)' }}>{song.title}</h1>
+                  <p className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{song.artist}</p>
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <button onClick={() => setShowEdit(true)} className="p-2 rounded-xl hover:bg-purple/20 transition-colors" title="Editar">
+                    <Edit3 className="w-4 h-4 text-purple-pastel" />
+                  </button>
+                  <button onClick={() => setShowDelete(true)} className="p-2 rounded-xl hover:bg-red-500/10 transition-colors" title="Eliminar">
+                    <Trash2 className="w-4 h-4 text-red-400" />
+                  </button>
+                </div>
               </div>
+              <span className="inline-block mt-2 text-[11px] px-2.5 py-1 rounded-full" style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)' }}>{song.genre}</span>
             </div>
-            <span className="inline-block mt-2 text-[11px] px-2.5 py-1 rounded-full" style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)' }}>{song.genre}</span>
           </div>
-        </div>
 
-        <div className="flex mb-6" style={{ borderBottom: '1px solid var(--border-color)' }}>
-          {['lyrics', 'chords'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-[1px] ${
-                activeTab === tab
-                  ? 'text-purple-pastel border-purple-pastel'
-                  : 'border-transparent'
-              }`}
-              style={{ color: activeTab === tab ? undefined : 'var(--text-secondary)' }}
-            >
-              {{ lyrics: 'Letra', chords: 'Acordes' }[tab]}
-            </button>
-          ))}
-        </div>
+          <div className="flex mb-6" style={{ borderBottom: '1px solid var(--border-color)' }}>
+            {['lyrics', 'chords'].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-[1px] ${
+                  activeTab === tab
+                    ? 'text-purple-pastel border-purple-pastel'
+                    : 'border-transparent'
+                }`}
+                style={{ color: activeTab === tab ? undefined : 'var(--text-secondary)' }}
+              >
+                {{ lyrics: 'Letra', chords: 'Acordes' }[tab]}
+              </button>
+            ))}
+          </div>
 
-        <SongContentView
-          lyrics={song.lyrics}
-          chords={song.chords}
-          activeTab={activeTab}
-          fontSize={activeTab === 'lyrics' ? fontSizeLyrics : fontSizeChords}
-          lineHeight={lineHeight}
-          displayMode={displayMode}
-        />
-      </div>
+          <SongContentView
+            lyrics={song.lyrics}
+            chords={song.chords}
+            activeTab={activeTab}
+            fontSize={activeTab === 'lyrics' ? fontSizeLyrics : fontSizeChords}
+            lineHeight={lineHeight}
+            displayMode={displayMode}
+          />
+        </div>
+      )}
 
       <SongPlayerBar
         fontSizeLyrics={fontSizeLyrics}
