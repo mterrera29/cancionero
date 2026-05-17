@@ -177,7 +177,8 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
               } catch {}
               setScraping(false);
             }}
-            className="px-5 py-3 rounded-xl bg-purple hover:bg-purple-light text-white font-medium transition-all flex items-center gap-2 text-sm shadow-sm hover:shadow-md"
+            className="px-5 py-3 rounded-xl bg-purple hover:bg-purple-light text-white font-medium transition-all flex items-center gap-2 text-sm shadow-sm hover:shadow-md shrink-0"
+            style={{ minWidth: '110px' }}
           >
             {scraping ? (
               <span className="flex items-center gap-2"><Spinner size="sm" /> Extrayendo...</span>
@@ -226,8 +227,9 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
               id="external-search-btn"
               type="button"
               onClick={() => doSearch()}
-              className="px-5 py-3 rounded-xl bg-purple hover:bg-purple-light text-white font-medium transition-all flex items-center justify-center gap-2 text-sm shadow-sm hover:shadow-md"
+              className="px-5 py-3 rounded-xl bg-purple hover:bg-purple-light text-white font-medium transition-all flex items-center justify-center gap-2 text-sm shadow-sm hover:shadow-md shrink-0"
               disabled={searching || fetchingLyrics}
+              style={{ minWidth: '100px' }}
             >
               {searching || fetchingLyrics ? (
                 <span className="flex items-center gap-2"><Spinner size="sm" /> Buscando...</span>

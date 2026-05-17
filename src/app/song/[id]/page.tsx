@@ -144,6 +144,9 @@ export default function SongDetailsPage() {
         /* ── Modo vertical: layout con header y tabs ── */
         <div className="max-w-3xl mx-auto px-6 pb-24 pt-20 animate-fade-in">
           <div className="flex items-start gap-5 mb-8">
+            <button onClick={() => router.push('/')} className="shrink-0 mt-1 p-1.5 rounded-lg hover:bg-purple/20 transition-colors">
+              <ArrowLeft className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
+            </button>
             {song.cover ? (
               <img src={song.cover} alt="" className="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-lg" />
             ) : (
