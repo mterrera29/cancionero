@@ -216,9 +216,73 @@ async function fetchLyrics(searchTitle: string, searchArtist: string): Promise<{
   return null;
 }
 
+// ── Chord scraping ──
+
+function slugifyChord(s: string): string {
+  return s.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+async function fetchChords(searchTitle: string, searchArtist: string): Promise<string | null> {
+  // Try 1: Direct GuitarTabs.cc URL (they use underscores)
+  if (searchArtist) {
+    const artistSlug = searchArtist.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    const titleSlug = searchTitle.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    const firstLetter = artistSlug.charAt(0);
+    const url = `https://www.guitartabs.cc/tabs/${firstLetter}/${artistSlug}/${titleSlug}_crd.html`;
+    const content = await fetchGuitarTabsContent(url);
+    if (content) return content;
+  }
+
+  // Try 2: Search via Chordie to find guitar tabs URLs
+  try {
+    const chordieUrl = `https://www.chordie.com/allsongs.php/songtitle/${slugifyChord(searchTitle)}/songartist/${slugifyChord(searchArtist || searchTitle)}/`;
+    const res = await fetch(chordieUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+    });
+    const html = await res.text();
+    const tabMatches = html.match(/chord\.pere\/(www\.guitartabs\.cc[^"'\s]+)/g);
+    if (tabMatches) {
+      for (const match of tabMatches) {
+        const path = match.replace(/^chord\.pere\//, '');
+        const content = await fetchGuitarTabsContent(`https://www.${path}`);
+        if (content) return content;
+      }
+    }
+  } catch {}
+
+  return null;
+}
+
+async function fetchGuitarTabsContent(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+    });
+    const html = await res.text();
+
+    const preRegex = /<pre[^>]*>([\s\S]*?)<\/pre>/gi;
+    const contents: string[] = [];
+    let match;
+    while ((match = preRegex.exec(html)) !== null) {
+      const text = match[1]
+        .replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+        .trim();
+      if (text.length > 50) contents.push(text);
+    }
+
+    return contents.length > 0 ? contents.join('\n\n') : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(request: Request) {
   try {
-    const { title, artist, query, mode, try_source } = await request.json();
+    const { title, artist, query, mode, try_source, search_mode } = await request.json();
     if (!title && !query) return NextResponse.json({ error: 'Título requerido' }, { status: 400 });
 
     const searchTitle = title || query || '';
@@ -228,6 +292,15 @@ export async function POST(request: Request) {
     if (mode === 'search') {
       const { candidates, hasMore } = await searchCandidates(searchTitle, try_source ?? -1);
       return NextResponse.json({ candidates, hasMore });
+    }
+
+    // Chord mode: fetch chords
+    if (search_mode === 'chords') {
+      const chords = await fetchChords(searchTitle, searchArtist);
+      if (chords) {
+        return NextResponse.json({ title: searchTitle, artist: searchArtist, chords });
+      }
+      return NextResponse.json({ error: 'No se encontraron acordes' }, { status: 404 });
     }
 
     // Normal mode: fetch lyrics directly
