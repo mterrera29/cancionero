@@ -27,7 +27,7 @@ export default function Home() {
   const [tab, setTab] = useState<'all' | 'artists' | 'genres'>('all');
   const [editSong, setEditSong] = useState<any>(null);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
-  const [newSongData, setNewSongData] = useState<{ title: string; artist: string; lyrics: string } | null>(null);
+  const [newSongData, setNewSongData] = useState<{ title: string; artist: string; lyrics?: string; chords?: string } | null>(null);
   const [showNewSongModal, setShowNewSongModal] = useState(false);
 
   const loadSongs = useCallback(async () => {

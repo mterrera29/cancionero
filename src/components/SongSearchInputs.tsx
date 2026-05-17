@@ -103,7 +103,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
 
     for (let i = 0; i < ordered.length; i++) {
       const c = ordered[i];
-      setSearchMsg(`Obteniendo letra: ${c.title} - ${c.artist}...`);
+      setSearchMsg(`Obteniendo ${searchMode === 'lyrics' ? 'letra' : 'acordes'}: ${c.title} - ${c.artist}...`);
       try {
         const query = `${c.title} - ${c.artist}`;
         const res = await fetch('/api/google-lyrics', {
@@ -192,9 +192,9 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
 
       {/* Sección de búsqueda por título/artista */}
       <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row gap-2 items-center">
+        <div className="flex gap-2 items-center">
           {/* Selector de modo: Letra o Acordes */}
-          <div className="flex gap-1 sm:gap-2">
+          <div className="flex gap-1 shrink-0">
             {(['lyrics', 'chords'] as const).map(mode => (
               <button
                 key={mode}
@@ -216,7 +216,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
             ))}
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-2 flex-1">
+          <div className="flex flex-1 min-w-0 flex-wrap gap-2">
             <input
               type="text"
               value={searchTitle}

@@ -216,7 +216,7 @@ async function fetchLyrics(searchTitle: string, searchArtist: string): Promise<{
   return null;
 }
 
-// ── Chord scraping ──
+// ── Chord scraping (via GuitarTabs.cc) ──
 
 function slugifyChord(s: string): string {
   return s.toLowerCase()
@@ -224,35 +224,10 @@ function slugifyChord(s: string): string {
     .replace(/^-|-$/g, '');
 }
 
-async function fetchChords(searchTitle: string, searchArtist: string): Promise<string | null> {
-  // Try 1: Direct GuitarTabs.cc URL (they use underscores)
-  if (searchArtist) {
-    const artistSlug = searchArtist.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-    const titleSlug = searchTitle.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-    const firstLetter = artistSlug.charAt(0);
-    const url = `https://www.guitartabs.cc/tabs/${firstLetter}/${artistSlug}/${titleSlug}_crd.html`;
-    const content = await fetchGuitarTabsContent(url);
-    if (content) return content;
-  }
-
-  // Try 2: Search via Chordie to find guitar tabs URLs
-  try {
-    const chordieUrl = `https://www.chordie.com/allsongs.php/songtitle/${slugifyChord(searchTitle)}/songartist/${slugifyChord(searchArtist || searchTitle)}/`;
-    const res = await fetch(chordieUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
-    });
-    const html = await res.text();
-    const tabMatches = html.match(/chord\.pere\/(www\.guitartabs\.cc[^"'\s]+)/g);
-    if (tabMatches) {
-      for (const match of tabMatches) {
-        const path = match.replace(/^chord\.pere\//, '');
-        const content = await fetchGuitarTabsContent(`https://www.${path}`);
-        if (content) return content;
-      }
-    }
-  } catch {}
-
-  return null;
+function underscoreSlug(s: string): string {
+  return s.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '');
 }
 
 async function fetchGuitarTabsContent(url: string): Promise<string | null> {
@@ -278,6 +253,41 @@ async function fetchGuitarTabsContent(url: string): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+async function fetchChordsFromGuitarTabs(searchTitle: string, searchArtist: string): Promise<string | null> {
+  // Try direct URL (underscore format)
+  if (searchArtist) {
+    const artistSlug = underscoreSlug(searchArtist);
+    const titleSlug = underscoreSlug(searchTitle);
+    const firstLetter = artistSlug.charAt(0);
+    const url = `https://www.guitartabs.cc/tabs/${firstLetter}/${artistSlug}/${titleSlug}_crd.html`;
+    const content = await fetchGuitarTabsContent(url);
+    if (content) return content;
+  }
+
+  // Fallback: search via Chordie to find guitar tabs URLs
+  try {
+    const chordieUrl = `https://www.chordie.com/allsongs.php/songtitle/${slugifyChord(searchTitle)}/songartist/${slugifyChord(searchArtist || searchTitle)}/`;
+    const res = await fetch(chordieUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+    });
+    const html = await res.text();
+    const tabMatches = html.match(/chord\.pere\/(www\.guitartabs\.cc[^"'\s]+)/g);
+    if (tabMatches) {
+      for (const match of tabMatches) {
+        const path = match.replace(/^chord\.pere\//, '');
+        const content = await fetchGuitarTabsContent(`https://www.${path}`);
+        if (content) return content;
+      }
+    }
+  } catch {}
+
+  return null;
+}
+
+async function fetchChords(searchTitle: string, searchArtist: string): Promise<string | null> {
+  return await fetchChordsFromGuitarTabs(searchTitle, searchArtist);
 }
 
 export async function POST(request: Request) {
