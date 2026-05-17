@@ -106,28 +106,40 @@ export default function SongDetailsPage() {
 
   return (
     <main className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
-      {/* Flecha volver flotante */}
-      <button
-        onClick={() => router.push('/')}
-        className="fixed top-4 left-4 z-50 w-9 h-9 rounded-xl flex items-center justify-center backdrop-blur-md transition-all hover:scale-105"
-        style={{ background: 'var(--header-bg)', border: '1px solid var(--border-color)' }}
-        title="Volver"
-      >
-        <ArrowLeft className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
-      </button>
-
       {displayMode === 'horizontal' ? (
-        /* ── Modo horizontal: pantalla completa, sin header/tabs ── */
-        <div className="w-full" style={{ height: 'calc(100vh - 72px)' }}>
-          <SongContentView
-            lyrics={song.lyrics}
-            chords={song.chords}
-            activeTab={activeTab}
-            fontSize={activeTab === 'lyrics' ? fontSizeLyrics : fontSizeChords}
-            lineHeight={lineHeight}
-            displayMode={displayMode}
-          />
-        </div>
+        /* ── Modo horizontal: header mínimo + columnas full ── */
+        <>
+          <div
+            className="flex items-center justify-between gap-2 px-4"
+            style={{ height: '44px', background: 'var(--header-bg)', borderBottom: '1px solid var(--border-color)' }}
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <button onClick={() => router.push('/')} className="shrink-0 p-1.5 rounded-lg hover:bg-purple/20 transition-colors">
+                <ArrowLeft className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
+              </button>
+              <span className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{song.title}</span>
+              <span className="text-sm hidden sm:inline" style={{ color: 'var(--text-muted)' }}>— {song.artist}</span>
+            </div>
+            <div className="flex gap-0.5 shrink-0">
+              <button onClick={() => setShowEdit(true)} className="p-1.5 rounded-lg hover:bg-purple/20 transition-colors" title="Editar">
+                <Edit3 className="w-4 h-4 text-purple-pastel" />
+              </button>
+              <button onClick={() => setShowDelete(true)} className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors" title="Eliminar">
+                <Trash2 className="w-4 h-4 text-red-400" />
+              </button>
+            </div>
+          </div>
+          <div className="w-full" style={{ height: 'calc(100vh - 44px - 72px)' }}>
+            <SongContentView
+              lyrics={song.lyrics}
+              chords={song.chords}
+              activeTab={activeTab}
+              fontSize={activeTab === 'lyrics' ? fontSizeLyrics : fontSizeChords}
+              lineHeight={lineHeight}
+              displayMode={displayMode}
+            />
+          </div>
+        </>
       ) : (
         /* ── Modo vertical: layout con header y tabs ── */
         <div className="max-w-3xl mx-auto px-6 pb-24 pt-20 animate-fade-in">
