@@ -20,8 +20,8 @@ export default function SongDetailsPage() {
   const [song, setSong] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('lyrics');
-  const [fontSizeLyrics, setFontSizeLyrics] = useState(16);
-  const [fontSizeChords, setFontSizeChords] = useState(16);
+  const [fontSizeLyrics, setFontSizeLyrics] = useState(14);
+  const [fontSizeChords, setFontSizeChords] = useState(14);
   const [lineHeight, setLineHeight] = useState(1);
   const [scrollSpeed, setScrollSpeed] = useState(0.3);
   const [delayTime, setDelayTime] = useState(0);
@@ -37,8 +37,8 @@ export default function SongDetailsPage() {
       const data = r.ok ? await r.json() : null;
       setSong(data);
       if (data) {
-        setFontSizeLyrics(data.fontSizeLyrics ?? 16);
-        setFontSizeChords(data.fontSizeChords ?? 16);
+        setFontSizeLyrics(data.fontSizeLyrics ?? 14);
+        setFontSizeChords(data.fontSizeChords ?? 14);
         setLineHeight(data.lineHeight ?? 1);
         setScrollSpeed(data.scrollSpeed ?? 0.3);
         setDelayTime(data.delayTime ?? 0);
@@ -103,24 +103,18 @@ export default function SongDetailsPage() {
 
   return (
     <main className="min-h-screen pb-20" style={{ background: 'var(--bg-primary)' }}>
-      <div className="sticky top-0 z-40" style={{ background: 'var(--header-bg)', borderBottom: '1px solid var(--border-color)' }}>
-        <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between">
-          <button onClick={() => router.push('/')} className="flex items-center gap-2 text-sm transition-colors" style={{ color: 'var(--text-secondary)' }}>
-            <ArrowLeft className="w-4 h-4" /> Volver
-          </button>
-          <div className="flex gap-1">
-            <button onClick={() => setShowEdit(true)} className="p-2 rounded-xl hover:bg-purple/20 transition-colors" title="Editar">
-              <Edit3 className="w-4 h-4 text-purple-pastel" />
-            </button>
-            <button onClick={() => setShowDelete(true)} className="p-2 rounded-xl hover:bg-red-500/10 transition-colors" title="Eliminar">
-              <Trash2 className="w-4 h-4 text-red-400" />
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Flecha volver flotante */}
+      <button
+        onClick={() => router.push('/')}
+        className="fixed top-4 left-4 z-50 w-9 h-9 rounded-xl flex items-center justify-center backdrop-blur-md transition-all hover:scale-105"
+        style={{ background: 'var(--header-bg)', border: '1px solid var(--border-color)' }}
+        title="Volver"
+      >
+        <ArrowLeft className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
+      </button>
 
       <div className="max-w-3xl mx-auto px-6 py-8 animate-fade-in">
-        <div className="flex items-center gap-5 mb-8">
+        <div className="flex items-start gap-5 mb-8">
           {song.cover ? (
             <img src={song.cover} alt="" className="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-lg" />
           ) : (
@@ -128,9 +122,21 @@ export default function SongDetailsPage() {
               <Music className="w-8 h-8 text-white/60" />
             </div>
           )}
-          <div>
-            <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>{song.title}</h1>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{song.artist}</p>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <h1 className="text-2xl font-bold mb-1 truncate" style={{ color: 'var(--text-primary)' }}>{song.title}</h1>
+                <p className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{song.artist}</p>
+              </div>
+              <div className="flex gap-1 shrink-0">
+                <button onClick={() => setShowEdit(true)} className="p-2 rounded-xl hover:bg-purple/20 transition-colors" title="Editar">
+                  <Edit3 className="w-4 h-4 text-purple-pastel" />
+                </button>
+                <button onClick={() => setShowDelete(true)} className="p-2 rounded-xl hover:bg-red-500/10 transition-colors" title="Eliminar">
+                  <Trash2 className="w-4 h-4 text-red-400" />
+                </button>
+              </div>
+            </div>
             <span className="inline-block mt-2 text-[11px] px-2.5 py-1 rounded-full" style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)' }}>{song.genre}</span>
           </div>
         </div>
