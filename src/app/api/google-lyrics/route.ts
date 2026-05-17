@@ -63,7 +63,12 @@ function clean(text: string): string {
 }
 
 function slug(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9áéíóúñ]+/g, '-').replace(/^-|-$/g, '');
+  return s.toLowerCase()
+    .replace(/\(.*?\)/g, '')         // saca (2021 Remasterizado), (En Vivo), etc.
+    .replace(/\[.*?\]/g, '')         // saca [Live], [Remastered], etc.
+    .replace(/[^a-z0-9áéíóúñ]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .replace(/^-|-$/g, '');          // doble pass por si quedó algo
 }
 
 const SITES = [
@@ -220,12 +225,16 @@ async function fetchLyrics(searchTitle: string, searchArtist: string): Promise<{
 
 function slugifyChord(s: string): string {
   return s.toLowerCase()
+    .replace(/\(.*?\)/g, '')
+    .replace(/\[.*?\]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 }
 
 function underscoreSlug(s: string): string {
   return s.toLowerCase()
+    .replace(/\(.*?\)/g, '')
+    .replace(/\[.*?\]/g, '')
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_|_$/g, '');
 }

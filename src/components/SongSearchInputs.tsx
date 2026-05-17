@@ -32,6 +32,10 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
     return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
 
+  function cleanSearchTitle(title: string): string {
+    return title.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
+  }
+
   async function doSearch(source?: number) {
     if (!searchTitle.trim()) return;
     const songTitle = searchTitle.trim();
@@ -105,12 +109,13 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
       const c = ordered[i];
       setSearchMsg(`Obteniendo ${searchMode === 'lyrics' ? 'letra' : 'acordes'}: ${c.title} - ${c.artist}...`);
       try {
-        const query = `${c.title} - ${c.artist}`;
+        const cleanTitle = cleanSearchTitle(c.title);
+        const query = `${cleanTitle} - ${c.artist}`;
         const res = await fetch('/api/google-lyrics', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            title: c.title,
+            title: cleanTitle,
             artist: c.artist,
             query,
             search_mode: searchMode,
@@ -118,9 +123,9 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
         });
         const data = await res.json();
         if ((data.lyrics || data.chords) || data.title) {
-          const cover = await fetchSpotifyCover(data.title || c.title, data.artist || c.artist);
+          const cover = await fetchSpotifyCover(data.title || cleanTitle, data.artist || c.artist);
           onSongFound({
-            title: data.title || c.title,
+            title: data.title || cleanTitle,
             artist: data.artist || c.artist,
             lyrics: searchMode === 'lyrics' ? (data.lyrics || '') : undefined,
             chords: searchMode === 'chords' ? (data.chords || '') : undefined,
