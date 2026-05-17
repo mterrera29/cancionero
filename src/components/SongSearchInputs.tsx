@@ -204,14 +204,14 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
             <option value="chords" style={{ background: 'var(--bg-card)' }}>Acordes</option>
           </select>
           
-          <div className="flex flex-1 min-w-0 flex-wrap gap-2">
+          <div className="flex flex-1 min-w-0 gap-2">
             <input
               type="text"
               value={searchTitle}
               onChange={e => { setSearchTitle(e.target.value); setCandidates([]); setTrySource(0); setHasMore(false); }}
               onKeyDown={e => e.key === 'Enter' && doSearch()}
               placeholder="Nombre de la canción..."
-              className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
+              className="flex-1 min-w-0 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
               style={{ background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
             />
             <input
@@ -220,7 +220,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
               onChange={e => { setSearchArtist(e.target.value); setTrySource(0); setHasMore(false); }}
               onKeyDown={e => e.key === 'Enter' && doSearch()}
               placeholder="Artista (opcional)..."
-              className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
+              className="flex-1 min-w-0 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all hidden sm:flex"
               style={{ background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
             />
             <button
