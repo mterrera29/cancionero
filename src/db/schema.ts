@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, integer, real, primaryKey } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, integer, real, boolean, primaryKey } from 'drizzle-orm/pg-core';
 
 export const songs = pgTable('songs', {
   id: text('id').primaryKey(),
@@ -9,6 +9,8 @@ export const songs = pgTable('songs', {
   cover: text('cover').default(''),
   lyrics: text('lyrics').default(''),
   chords: text('chords').default(''),
+  isPublic: boolean('is_public').default(false),
+  displayName: text('display_name'),
   fontSizeLyrics: integer('font_size_lyrics').default(14),
   fontSizeChords: integer('font_size_chords').default(14),
   lineHeight: real('line_height').default(1),

@@ -7,6 +7,8 @@ export interface Song {
   cover?: string;
   lyrics?: string;
   chords?: string;
+  isPublic?: boolean;
+  displayName?: string;
   fontSizeLyrics?: number;
   fontSizeChords?: number;
   lineHeight?: number;
