@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save } from 'lucide-react';
+import { Save, Globe, Lock } from 'lucide-react';
 import { Song } from '@/types';
 import Spinner from './Spinner';
+import { useAuth } from '@/hooks/useAuth';
 
 interface NewSongFormProps {
   userId: string;
@@ -14,8 +15,10 @@ interface NewSongFormProps {
 }
 
 export default function NewSongForm({ userId, onClose, onSuccess, editSong, initialData }: NewSongFormProps) {
+  const { getToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState<'lyrics' | 'chords' | null>(null);
+  const [isPublic, setIsPublic] = useState(false);
 
   // Estado inicial con valores por defecto
   const [formData, setFormData] = useState({
@@ -39,6 +42,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
         lyrics: editSong.lyrics || '',
         chords: editSong.chords || '',
       });
+      setIsPublic(editSong.isPublic ?? false);
     } else if (initialData) {
       // Si es una nueva canción con datos iniciales, actualizamos solo los campos que vengan
       setFormData(prev => ({
@@ -75,30 +79,35 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
        e.preventDefault();
        setLoading(true);
        try {
-         const songId = editSong?.id || crypto.randomUUID();
-         const method = editSong ? 'PUT' : 'POST';
-         const endpoint = editSong ? `${userId}/${editSong.id}` : userId;
-         // Validar que los campos requeridos no estén vacíos
-     if (!formData.title || !formData.artist) {
-       console.error('Título y artista son obligatorios');
-       return;
-     }
+          const songId = editSong?.id || crypto.randomUUID();
+          const method = editSong ? 'PUT' : 'POST';
+          const endpoint = editSong ? `${userId}/${editSong.id}` : userId;
+          // Validar que los campos requeridos no estén vacíos
+      if (!formData.title || !formData.artist) {
+        console.error('Título y artista son obligatorios');
+        return;
+      }
 
-     console.log('Enviando datos:', { ...formData, id: songId }); // Debug
-     const res = await fetch(`/api/songs/${endpoint}`, {
-       method,
-       headers: { 'Content-Type': 'application/json' },
-       body: JSON.stringify({
-         id: songId,
-         userId, // Asegurar que el userId se envíe
-         title: formData.title,
-         artist: formData.artist,
-         genre: formData.genre || null, // Si no hay género, enviar null
-         cover: formData.cover || null, // Si no hay portada, enviar null
-         lyrics: formData.lyrics || '', // Si no hay letra, enviar string vacío
-         chords: formData.chords || '', // Si no hay acordes, enviar string vacío
-       }),
-     });
+      const token = await getToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      console.log('Enviando datos:', { ...formData, id: songId, isPublic }); // Debug
+      const res = await fetch(`/api/songs/${endpoint}`, {
+        method,
+        headers,
+        body: JSON.stringify({
+          id: songId,
+          userId, // Asegurar que el userId se envíe
+          title: formData.title,
+          artist: formData.artist,
+          genre: formData.genre || null, // Si no hay género, enviar null
+          cover: formData.cover || null, // Si no hay portada, enviar null
+          lyrics: formData.lyrics || '', // Si no hay letra, enviar string vacío
+          chords: formData.chords || '', // Si no hay acordes, enviar string vacío
+          isPublic,
+        }),
+      });
 
      if (!res.ok) {
        const errorData = await res.json();
@@ -182,6 +191,32 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Portada de Spotify</span>
          </div>
        )}
+
+        {/* Canción pública */}
+        <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
+          <div className="flex items-center gap-2.5">
+            {isPublic ? (
+              <Globe className="w-4 h-4 text-purple-pastel" />
+            ) : (
+              <Lock className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+            )}
+            <div>
+              <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Canción pública</span>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                {isPublic ? 'Visible para todos los usuarios' : 'Solo visible para vos'}
+              </p>
+            </div>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-10 h-5 rounded-full peer peer-checked:bg-purple bg-gray-600 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-[19px]" />
+          </label>
+        </div>
 
         {/* Letra */}
         <div>

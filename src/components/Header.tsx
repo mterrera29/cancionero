@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Music, ListMusic, Plus, LogIn, LogOut, User as UserIcon } from 'lucide-react';
+import { Music, ListMusic, Plus, LogIn, LogOut, User as UserIcon, Globe } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Modal from './Modal';
 import NewSongForm from './NewSongForm';
@@ -71,10 +71,18 @@ export default function Header({ onSongAdded }: HeaderProps) {
                        <span style={{ color: 'var(--text-primary)' }} className="font-medium">Mis Listas</span>
                      </button>
 
-                     {/* Separador */}
-                     {userId && <div className="pt-2 pb-1"><div className="h-px" style={{ background: 'var(--border-color)' }}></div></div>}
+                      <button
+                        onClick={() => { router.push('/public'); setIsMenuOpen(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-purple/10 transition-colors text-left"
+                      >
+                        <Globe className="w-5 h-5 text-purple-pastel" />
+                        <span style={{ color: 'var(--text-primary)' }} className="font-medium">Canciones Públicas</span>
+                      </button>
 
-                     {/* Botón Nueva Canción (en el menú) */}
+                      {/* Separador */}
+                      {userId && <div className="pt-2 pb-1"><div className="h-px" style={{ background: 'var(--border-color)' }}></div></div>}
+
+                      {/* Botón Nueva Canción (en el menú) */}
                      {userId && (
                        <button
                          onClick={() => { setIsModalOpen(true); setIsMenuOpen(false); }}

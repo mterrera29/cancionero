@@ -8,16 +8,22 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   userId: string | null;
+  userDisplayName: string | null;
+  userEmail: string | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
+  getToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   userId: null,
+  userDisplayName: null,
+  userEmail: null,
   login: async () => {},
   logout: async () => {},
+  getToken: async () => null,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -41,10 +47,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signOut(auth);
   }
 
+  async function getToken() {
+    if (!user) return null;
+    return user.getIdToken();
+  }
+
   const userId = user?.uid || null;
+  const userDisplayName = user?.displayName || null;
+  const userEmail = user?.email || null;
 
   return (
-    <AuthContext.Provider value={{ user, loading, userId, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, userId, userDisplayName, userEmail, login, logout, getToken }}>
       {children}
     </AuthContext.Provider>
   );
