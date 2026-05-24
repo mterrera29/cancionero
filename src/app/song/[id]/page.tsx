@@ -14,11 +14,12 @@ import { useAuth } from '@/hooks/useAuth';
 export default function SongDetailsPage() {
   const params = useParams();
   const router = useRouter();
-  const { userId } = useAuth();
+  const { userId, getToken } = useAuth();
   useWakeLock();
 
   const [song, setSong] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isOwner, setIsOwner] = useState(false);
   const [activeTab, setActiveTab] = useState('lyrics');
   const [fontSizeLyrics, setFontSizeLyrics] = useState(14);
   const [fontSizeChords, setFontSizeChords] = useState(14);
@@ -31,54 +32,85 @@ export default function SongDetailsPage() {
 
   // Cargar/recargar canción
   const loadSong = useCallback(async () => {
-    if (!userId) return;
     setLoading(true);
     try {
-      const r = await fetch(`/api/songs/${userId}/${params.id}`);
-      const data = r.ok ? await r.json() : null;
-      setSong(data);
-      if (data) {
-        setFontSizeLyrics(data.fontSizeLyrics ?? 14);
-        setFontSizeChords(data.fontSizeChords ?? 14);
-        setLineHeight(data.lineHeight ?? 1);
-        setDisplayMode(data.displayMode ?? 'vertical');
-        setScrollSpeed(data.scrollSpeed ?? 0.3);
-        setDelayTime(data.delayTime ?? 0);
-        if (!data.cover && data.title) {
-          fetch(`/api/spotify/search?q=${encodeURIComponent(data.title + ' ' + (data.artist || ''))}&type=track`)
-            .then(r => r.json())
-            .then(sp => {
-              const cover = sp.tracks?.[0]?.cover;
-              if (cover) {
-                fetch(`/api/songs/${userId}/${params.id}`, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ cover }),
-                });
-                setSong((prev: any) => prev ? { ...prev, cover } : prev);
-              }
-            })
-            .catch(() => {});
+      // First try: load as owner via userId route
+      if (userId) {
+        const r = await fetch(`/api/songs/${userId}/${params.id}`);
+        if (r.ok) {
+          const data = await r.json();
+          setSong(data);
+          setIsOwner(true);
+          applySettings(data);
+          return;
         }
       }
-    } catch {} finally {
+
+      // Second try: load as public song
+      const r = await fetch(`/api/songs/public/${params.id}`);
+      if (r.ok) {
+        const data = await r.json();
+        setSong(data);
+        setIsOwner(false);
+        applySettings(data);
+        return;
+      }
+
+      // Not found
+      setSong(null);
+    } catch {
+      setSong(null);
+    } finally {
       setLoading(false);
     }
   }, [userId, params.id]);
+
+  function applySettings(data: any) {
+    setFontSizeLyrics(data.fontSizeLyrics ?? 14);
+    setFontSizeChords(data.fontSizeChords ?? 14);
+    setLineHeight(data.lineHeight ?? 1);
+    setDisplayMode(data.displayMode ?? 'vertical');
+    setScrollSpeed(data.scrollSpeed ?? 0.3);
+    setDelayTime(data.delayTime ?? 0);
+    if (!data.cover && data.title && userId) {
+      fetch(`/api/spotify/search?q=${encodeURIComponent(data.title + ' ' + (data.artist || ''))}&type=track`)
+        .then(r => r.json())
+        .then(sp => {
+          const cover = sp.tracks?.[0]?.cover;
+          if (cover) {
+            fetch(`/api/songs/${userId}/${params.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ cover }),
+            });
+            setSong((prev: any) => prev ? { ...prev, cover } : prev);
+          }
+        })
+        .catch(() => {});
+    }
+  }
 
   useEffect(() => { loadSong(); }, [loadSong]);
 
   async function deleteSong() {
     if (!userId) return;
-    await fetch(`/api/songs/${userId}/${params.id}`, { method: 'DELETE' });
+    const token = await getToken();
+    await fetch(`/api/songs/${userId}/${params.id}`, {
+      method: 'DELETE',
+      headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+    });
     router.push('/');
   }
 
   async function saveSettings() {
     if (!userId) return;
+    const token = await getToken();
     await fetch(`/api/songs/${userId}/${params.id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({
         fontSizeLyrics,
         fontSizeChords,
@@ -120,14 +152,20 @@ export default function SongDetailsPage() {
               <span className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{song.title}</span>
               <span className="text-sm hidden sm:inline" style={{ color: 'var(--text-muted)' }}>— {song.artist}</span>
             </div>
-            <div className="flex gap-0.5 shrink-0">
-              <button onClick={() => setShowEdit(true)} className="p-1.5 rounded-lg hover:bg-purple/20 transition-colors" title="Editar">
-                <Edit3 className="w-4 h-4 text-purple-pastel" />
-              </button>
-              <button onClick={() => setShowDelete(true)} className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors" title="Eliminar">
-                <Trash2 className="w-4 h-4 text-red-400" />
-              </button>
-            </div>
+            {isOwner ? (
+              <div className="flex gap-0.5 shrink-0">
+                <button onClick={() => setShowEdit(true)} className="p-1.5 rounded-lg hover:bg-purple/20 transition-colors" title="Editar">
+                  <Edit3 className="w-4 h-4 text-purple-pastel" />
+                </button>
+                <button onClick={() => setShowDelete(true)} className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors" title="Eliminar">
+                  <Trash2 className="w-4 h-4 text-red-400" />
+                </button>
+              </div>
+            ) : song.displayName ? (
+              <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>
+                por {song.displayName}
+              </span>
+            ) : null}
           </div>
           <div className="w-full" style={{ height: 'calc(100vh - 44px - 72px)' }}>
             <SongContentView
@@ -159,15 +197,22 @@ export default function SongDetailsPage() {
                 <div className="min-w-0">
                   <h1 className="text-2xl font-bold mb-1 truncate" style={{ color: 'var(--text-primary)' }}>{song.title}</h1>
                   <p className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{song.artist}</p>
+                  {!isOwner && song.displayName && (
+                    <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+                      por {song.displayName}
+                    </p>
+                  )}
                 </div>
-                <div className="flex gap-1 shrink-0">
-                  <button onClick={() => setShowEdit(true)} className="p-2 rounded-xl hover:bg-purple/20 transition-colors" title="Editar">
-                    <Edit3 className="w-4 h-4 text-purple-pastel" />
-                  </button>
-                  <button onClick={() => setShowDelete(true)} className="p-2 rounded-xl hover:bg-red-500/10 transition-colors" title="Eliminar">
-                    <Trash2 className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
+                {isOwner && (
+                  <div className="flex gap-1 shrink-0">
+                    <button onClick={() => setShowEdit(true)} className="p-2 rounded-xl hover:bg-purple/20 transition-colors" title="Editar">
+                      <Edit3 className="w-4 h-4 text-purple-pastel" />
+                    </button>
+                    <button onClick={() => setShowDelete(true)} className="p-2 rounded-xl hover:bg-red-500/10 transition-colors" title="Eliminar">
+                      <Trash2 className="w-4 h-4 text-red-400" />
+                    </button>
+                  </div>
+                )}
               </div>
               <span className="inline-block mt-2 text-[11px] px-2.5 py-1 rounded-full" style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)' }}>{song.genre}</span>
             </div>
@@ -232,29 +277,31 @@ export default function SongDetailsPage() {
         </Modal>
       )}
 
-      <Modal isOpen={showDelete} onClose={() => setShowDelete(false)}>
-        <div className="p-6">
-          <h2 className="text-lg font-bold text-purple-pastel mb-3">Eliminar canción</h2>
-          <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
-            ¿Estás seguro de que querés eliminar <span className="text-purple-pastel font-medium">{song.title}</span>?
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={deleteSong}
-              className="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium px-5 py-3 rounded-xl transition-all"
-            >
-              Eliminar
-            </button>
-            <button
-              onClick={() => setShowDelete(false)}
-              className="px-6 py-3 rounded-xl transition-colors"
-              style={{ border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}
-            >
-              Cancelar
-            </button>
+      {isOwner && (
+        <Modal isOpen={showDelete} onClose={() => setShowDelete(false)}>
+          <div className="p-6">
+            <h2 className="text-lg font-bold text-purple-pastel mb-3">Eliminar canción</h2>
+            <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
+              ¿Estás seguro de que querés eliminar <span className="text-purple-pastel font-medium">{song.title}</span>?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={deleteSong}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium px-5 py-3 rounded-xl transition-all"
+              >
+                Eliminar
+              </button>
+              <button
+                onClick={() => setShowDelete(false)}
+                className="px-6 py-3 rounded-xl transition-colors"
+                style={{ border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
-        </div>
-      </Modal>
+        </Modal>
+      )}
     </main>
   );
 }
