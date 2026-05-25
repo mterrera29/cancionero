@@ -2,14 +2,36 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { songs } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { requireOwnership } from '@/lib/firebase-admin';
+import { requireOwnership, verifyFirebaseToken } from '@/lib/firebase-admin';
 
-export async function GET(_request: Request, { params }: { params: Promise<{ userId: string; songId: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ userId: string; songId: string }> }) {
   try {
     const { userId, songId } = await params;
     const result = await db.select().from(songs).where(and(eq(songs.id, songId), eq(songs.userId, userId))).limit(1);
     if (!result.length) return NextResponse.json({ message: 'Canción no encontrada' }, { status: 404 });
-    return NextResponse.json(result[0]);
+
+    const song = result[0];
+
+    // Public songs are viewable by anyone
+    if (song.isPublic) {
+      return NextResponse.json(song);
+    }
+
+    // Private songs: only the owner can view them
+    let isOwner = false;
+    try {
+      const decoded = await verifyFirebaseToken(request);
+      isOwner = decoded.uid === userId;
+    } catch {
+      // No valid token
+    }
+
+    if (isOwner) {
+      return NextResponse.json(song);
+    }
+
+    // Return 404 to avoid revealing the existence of private songs
+    return NextResponse.json({ message: 'Canción no encontrada' }, { status: 404 });
   } catch (error) {
     return NextResponse.json({ error: (error as Error).message }, { status: 500 });
   }

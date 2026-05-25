@@ -18,12 +18,13 @@ interface SongPlayerBarProps {
   setDelayTime: (n: number) => void;
   activeTab: string;
   onSave: () => void;
+  horizontalScrollRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function SongPlayerBar({
   fontSizeLyrics, fontSizeChords, setFontSizeLyrics, setFontSizeChords, lineHeight, setLineHeight,
   displayMode, setDisplayMode,
-  scrollSpeed, setScrollSpeed, delayTime, setDelayTime, activeTab, onSave,
+  scrollSpeed, setScrollSpeed, delayTime, setDelayTime, activeTab, onSave, horizontalScrollRef,
 }: SongPlayerBarProps) {
   const minSpeed = 0.1;
   const maxSpeed = 1;
@@ -64,10 +65,16 @@ export default function SongPlayerBar({
           accRef.current += scrollSpeedRef.current;
           if (accRef.current >= 1) {
             const amount = Math.floor(accRef.current);
-            window.scrollBy(0, amount);
+            if (displayMode === 'horizontal' && horizontalScrollRef?.current) {
+              horizontalScrollRef.current.scrollLeft += amount;
+              const el = horizontalScrollRef.current;
+              if (el.scrollLeft + el.clientWidth >= el.scrollWidth) stopAll();
+            } else {
+              window.scrollBy(0, amount);
+              if (window.innerHeight + window.scrollY >= document.body.offsetHeight) stopAll();
+            }
             accRef.current -= amount;
           }
-          if (window.innerHeight + window.scrollY >= document.body.offsetHeight) stopAll();
         }, 50);
       }
     }, 50);

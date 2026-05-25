@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 export default function ListDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { userId } = useAuth();
+  const { userId, getToken } = useAuth();
   const [list, setList] = useState<any>(null);
   const [songs, setSongs] = useState<any[]>([]);
   const [allSongs, setAllSongs] = useState<any[]>([]);
@@ -19,17 +19,23 @@ export default function ListDetailPage() {
 
   useEffect(() => {
     if (!userId) return;
-    Promise.all([
-      fetch(`/api/lists/${userId}/${params.id}`).then(r => r.ok ? r.json() : null),
-      fetch(`/api/songs/${userId}`).then(r => r.ok ? r.json() : []),
-    ]).then(([listData, songsData]) => {
+    (async () => {
+      const token = await getToken();
+      const headers: Record<string, string> = token
+        ? { Authorization: `Bearer ${token}` }
+        : {};
+      const [listData, songsData] = await Promise.all([
+        fetch(`/api/lists/${userId}/${params.id}`).then(r => r.ok ? r.json() : null),
+        fetch(`/api/songs/${userId}`, { headers }).then(r => r.ok ? r.json() : []),
+      ]);
       if (listData) {
         setList(listData.list);
         setSongs(listData.songs || []);
       }
       setAllSongs(Array.isArray(songsData) ? songsData : []);
-    }).finally(() => setLoading(false));
-  }, [params.id]);
+      setLoading(false);
+    })();
+  }, [params.id, userId, getToken]);
 
   if (loading) return <Spinner />;
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Music, ListMusic, Plus, LogIn, LogOut, User as UserIcon, Globe } from 'lucide-react';
+import { Music, ListMusic, Plus, LogIn, LogOut, User as UserIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Modal from './Modal';
 import NewSongForm from './NewSongForm';
@@ -56,27 +56,19 @@ export default function Header({ onSongAdded }: HeaderProps) {
                      <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>🔥 Cancionero 🎸</h2>
                    </div>
                    <div className="p-4 space-y-1">
-                     <button
-                       onClick={() => { router.push('/'); setIsMenuOpen(false); }}
-                       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-purple/10 transition-colors text-left"
-                     >
-                       <Music className="w-5 h-5 text-purple-pastel" />
-                       <span style={{ color: 'var(--text-primary)' }} className="font-medium">Mis Canciones</span>
-                     </button>
-                     <button
-                       onClick={() => { router.push('/lists'); setIsMenuOpen(false); }}
-                       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-purple/10 transition-colors text-left"
-                     >
-                       <ListMusic className="w-5 h-5 text-purple-pastel" />
-                       <span style={{ color: 'var(--text-primary)' }} className="font-medium">Mis Listas</span>
-                     </button>
-
                       <button
-                        onClick={() => { router.push('/public'); setIsMenuOpen(false); }}
+                        onClick={() => { router.push('/mis-canciones'); setIsMenuOpen(false); }}
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-purple/10 transition-colors text-left"
                       >
-                        <Globe className="w-5 h-5 text-purple-pastel" />
-                        <span style={{ color: 'var(--text-primary)' }} className="font-medium">Canciones Públicas</span>
+                        <Music className="w-5 h-5 text-purple-pastel" />
+                        <span style={{ color: 'var(--text-primary)' }} className="font-medium">Mis Canciones</span>
+                      </button>
+                      <button
+                        onClick={() => { router.push('/lists'); setIsMenuOpen(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-purple/10 transition-colors text-left"
+                      >
+                        <ListMusic className="w-5 h-5 text-purple-pastel" />
+                        <span style={{ color: 'var(--text-primary)' }} className="font-medium">Mis Listas</span>
                       </button>
 
                       {/* Separador */}

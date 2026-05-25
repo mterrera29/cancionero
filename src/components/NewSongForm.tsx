@@ -18,7 +18,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
   const { getToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState<'lyrics' | 'chords' | null>(null);
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
 
   // Estado inicial con valores por defecto
   const [formData, setFormData] = useState({

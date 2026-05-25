@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Music, Edit3, Trash2 } from 'lucide-react';
 import SongContentView from '@/components/SongContentView';
@@ -29,6 +29,7 @@ export default function SongDetailsPage() {
   const [delayTime, setDelayTime] = useState(0);
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const horizontalScrollRef = useRef<HTMLDivElement | null>(null);
 
   // Cargar/recargar canción
   const loadSong = useCallback(async () => {
@@ -36,7 +37,10 @@ export default function SongDetailsPage() {
     try {
       // First try: load as owner via userId route
       if (userId) {
-        const r = await fetch(`/api/songs/${userId}/${params.id}`);
+        const token = await getToken();
+        const r = await fetch(`/api/songs/${userId}/${params.id}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         if (r.ok) {
           const data = await r.json();
           setSong(data);
@@ -78,10 +82,15 @@ export default function SongDetailsPage() {
         .then(sp => {
           const cover = sp.tracks?.[0]?.cover;
           if (cover) {
-            fetch(`/api/songs/${userId}/${params.id}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ cover }),
+            getToken().then(token => {
+              fetch(`/api/songs/${userId}/${params.id}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({ cover }),
+              });
             });
             setSong((prev: any) => prev ? { ...prev, cover } : prev);
           }
@@ -142,16 +151,33 @@ export default function SongDetailsPage() {
         /* ── Modo horizontal: header mínimo + columnas full ── */
         <>
           <div
-            className="flex items-center justify-between gap-2 px-4"
+            className="flex items-center gap-2 px-4"
             style={{ height: '44px', background: 'var(--header-bg)', borderBottom: '1px solid var(--border-color)' }}
           >
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2 min-w-0 shrink-0">
               <button onClick={() => router.push('/')} className="shrink-0 p-1.5 rounded-lg hover:bg-purple/20 transition-colors">
                 <ArrowLeft className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
               </button>
-              <span className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{song.title}</span>
+              <span className="text-sm font-medium truncate max-w-[120px] sm:max-w-none" style={{ color: 'var(--text-primary)' }}>{song.title}</span>
               <span className="text-sm hidden sm:inline" style={{ color: 'var(--text-muted)' }}>— {song.artist}</span>
             </div>
+
+            {/* Tabs lyrics/chords */}
+            <div className="flex items-center gap-1 mx-auto">
+              {['lyrics', 'chords'].map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                    activeTab === tab ? 'bg-purple text-white' : 'hover:bg-purple/10'
+                  }`}
+                  style={{ color: activeTab === tab ? '#fff' : 'var(--text-secondary)' }}
+                >
+                  {{ lyrics: 'Letra', chords: 'Acordes' }[tab]}
+                </button>
+              ))}
+            </div>
+
             {isOwner ? (
               <div className="flex gap-0.5 shrink-0">
                 <button onClick={() => setShowEdit(true)} className="p-1.5 rounded-lg hover:bg-purple/20 transition-colors" title="Editar">
@@ -175,6 +201,7 @@ export default function SongDetailsPage() {
               fontSize={activeTab === 'lyrics' ? fontSizeLyrics : fontSizeChords}
               lineHeight={lineHeight}
               displayMode={displayMode}
+              horizontalScrollRef={horizontalScrollRef}
             />
           </div>
         </>
@@ -261,6 +288,7 @@ export default function SongDetailsPage() {
         setDelayTime={setDelayTime}
         activeTab={activeTab}
         onSave={saveSettings}
+        horizontalScrollRef={horizontalScrollRef}
       />
 
       {userId && (
