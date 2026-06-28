@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import Modal from '@/components/Modal';
 import NewSongForm from '@/components/NewSongForm';
 import SongSearchInputs from '@/components/SongSearchInputs';
+import { SongCardSkeleton } from '@/components/Skeleton';
 import Spinner from '@/components/Spinner';
 import { useAuth } from '@/hooks/useAuth';
 const COLORS = ['#5c3e91', '#7c3aed', '#a855f7', '#8b5cf6', '#6d28d9', '#4c1d95', '#3b0764', '#701a75'];
@@ -204,7 +205,7 @@ export default function MisCancionesPage() {
 
             {loading ? (
               <div className="text-center py-16">
-                <Spinner size="lg" />
+                <SongCardSkeleton />
               </div>
             ) : (
               <div className="space-y-4">

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Play, Music, Edit2, Trash2, MoreVertical, Plus } from 'lucide-react';
 import { useState } from 'react';
@@ -31,7 +32,7 @@ export default function SongCard({ song, onDelete, onEdit, onAddToList, showAuth
         className="group flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors relative cursor-pointer hover:bg-white/5"
       >
         {song.cover ? (
-          <img src={song.cover} alt="" className="w-10 h-10 rounded-md shrink-0 object-cover" />
+          <Image src={song.cover} alt="" width={40} height={40} className="w-10 h-10 rounded-md shrink-0 object-cover" />
         ) : (
           <div className="w-10 h-10 rounded-md shrink-0 flex items-center justify-center" style={{ background: getColor(song.id) }}>
             <Music className="w-5 h-5 text-white/70" />

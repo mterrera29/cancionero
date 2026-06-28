@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Music, LogIn } from 'lucide-react';
 import SongCard from '@/components/SongCard';
-import Spinner from '@/components/Spinner';
+import { SongListSkeleton } from '@/components/Skeleton';
 import Header from '@/components/Header';
 import { useAuth } from '@/hooks/useAuth';
 import type { Song } from '@/types';
@@ -71,9 +71,7 @@ export default function PublicSongsPage() {
 
         {/* Results */}
         {loading ? (
-          <div className="text-center py-16">
-            <Spinner size="lg" />
-          </div>
+          <SongListSkeleton />
         ) : songs.length === 0 ? (
           <div className="text-center py-16 rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
             <Music className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--text-muted)' }} />

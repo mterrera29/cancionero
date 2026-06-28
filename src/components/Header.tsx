@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { Music, ListMusic, Plus, LogIn, LogOut, User as UserIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Modal from './Modal';
@@ -116,7 +117,7 @@ export default function Header({ onSongAdded }: HeaderProps) {
               {/* Usuario y cerrar sesión */}
               <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl hover:bg-white/5 transition-colors">
                 {user.photoURL ? (
-                  <img src={user.photoURL} alt="" className="w-8 h-8 rounded-full border-2 border-purple/30" />
+                  <Image src={user.photoURL} alt="" width={32} height={32} className="w-8 h-8 rounded-full border-2 border-purple/30" />
                 ) : (
                   <UserIcon className="w-6 h-6 text-purple-pastel" />
                 )}

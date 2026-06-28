@@ -38,8 +38,8 @@ export default function SongPlayerBar({
   const scrollSpeedRef = useRef(scrollSpeed);
   const delayTimeRef = useRef(delayTime);
 
-  scrollSpeedRef.current = scrollSpeed;
-  delayTimeRef.current = delayTime;
+  useEffect(() => { scrollSpeedRef.current = scrollSpeed; }, [scrollSpeed]);
+  useEffect(() => { delayTimeRef.current = delayTime; }, [delayTime]);
 
   const stopAll = () => {
     setIsScrolling(false);
@@ -92,7 +92,7 @@ export default function SongPlayerBar({
       </div>
       <div className="flex items-center justify-center gap-3 px-4 py-2 max-w-3xl mx-auto">
         <button
-          onClick={() => { isScrolling ? stopAll() : startScroll(); }}
+          onClick={() => { if (isScrolling) stopAll(); else startScroll(); }}
           className="flex items-center justify-center w-9 h-9 rounded-xl bg-purple hover:bg-purple-light transition-colors"
         >
           {isScrolling ? <Square className="w-4 h-4 text-white" fill="white" /> : <Play className="w-4 h-4 text-white" fill="white" />}

@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { ArrowLeft, Music, Edit3, Trash2 } from 'lucide-react';
 import SongContentView from '@/components/SongContentView';
 import SongPlayerBar from '@/components/SongPlayerBar';
 import Modal from '@/components/Modal';
 import NewSongForm from '@/components/NewSongForm';
-import Spinner from '@/components/Spinner';
+import { SongDetailSkeleton } from '@/components/Skeleton';
+import { getCachedCover, setCachedCover } from '@/lib/cover-cache';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -77,25 +79,32 @@ export default function SongDetailsPage() {
     setScrollSpeed(data.scrollSpeed ?? 0.3);
     setDelayTime(data.delayTime ?? 0);
     if (!data.cover && data.title && userId) {
-      fetch(`/api/spotify/search?q=${encodeURIComponent(data.title + ' ' + (data.artist || ''))}&type=track`)
-        .then(r => r.json())
-        .then(sp => {
-          const cover = sp.tracks?.[0]?.cover;
-          if (cover) {
-            getToken().then(token => {
-              fetch(`/api/songs/${userId}/${params.id}`, {
-                method: 'PUT',
-                headers: {
-                  'Content-Type': 'application/json',
-                  ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-                },
-                body: JSON.stringify({ cover }),
+      const query = data.title + ' ' + (data.artist || '');
+      const cached = getCachedCover(query);
+      if (cached !== undefined) {
+        if (cached) setSong((prev: any) => prev ? { ...prev, cover: cached } : prev);
+      } else {
+        fetch(`/api/spotify/search?q=${encodeURIComponent(query)}&type=track`)
+          .then(r => r.json())
+          .then(sp => {
+            const cover = sp.tracks?.[0]?.cover;
+            setCachedCover(query, cover || null);
+            if (cover) {
+              getToken().then(token => {
+                fetch(`/api/songs/${userId}/${params.id}`, {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                  },
+                  body: JSON.stringify({ cover }),
+                });
               });
-            });
-            setSong((prev: any) => prev ? { ...prev, cover } : prev);
-          }
-        })
-        .catch(() => {});
+              setSong((prev: any) => prev ? { ...prev, cover } : prev);
+            }
+          })
+          .catch(() => { setCachedCover(query, null); });
+      }
     }
   }
 
@@ -131,7 +140,7 @@ export default function SongDetailsPage() {
     });
   }
 
-  if (loading) return <Spinner />;
+  if (loading) return <SongDetailSkeleton />;
 
   if (!song) {
     return (
@@ -213,7 +222,7 @@ export default function SongDetailsPage() {
               <ArrowLeft className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
             </button>
             {song.cover ? (
-              <img src={song.cover} alt="" className="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-lg" />
+              <Image src={song.cover} alt="" width={80} height={80} className="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-lg" />
             ) : (
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple to-purple-light flex items-center justify-center shrink-0 shadow-lg">
                 <Music className="w-8 h-8 text-white/60" />

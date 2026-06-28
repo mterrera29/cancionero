@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Music, Trash2, Plus } from 'lucide-react';
-import Spinner from '@/components/Spinner';
+import { SongListSkeleton } from '@/components/Skeleton';
 import Modal from '@/components/Modal';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -37,7 +37,7 @@ export default function ListDetailPage() {
     })();
   }, [params.id, userId, getToken]);
 
-  if (loading) return <Spinner />;
+  if (loading) return <SongListSkeleton />;
 
   if (!list) {
     return (

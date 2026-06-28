@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Plus, ListMusic, Trash2 } from 'lucide-react';
-import Spinner from '@/components/Spinner';
+import { SongListSkeleton } from '@/components/Skeleton';
 import Modal from '@/components/Modal';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -41,7 +41,7 @@ export default function ListsPage() {
       <div className="max-w-3xl mx-auto px-6 py-8">
         <h1 className="text-2xl font-bold text-purple-pastel mb-8">Mis Listas</h1>
 
-        {loading ? <Spinner /> : lists.length === 0 ? (
+        {loading ? <SongListSkeleton /> : lists.length === 0 ? (
           <div className="text-center py-16">
             <ListMusic className="w-12 h-12 mx-auto text-white/20 mb-3" />
             <p className="text-white/40 mb-4">No tenés listas todavía</p>
