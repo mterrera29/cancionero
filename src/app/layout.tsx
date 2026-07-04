@@ -1,11 +1,21 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { DM_Sans, Fraunces } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { AuthProvider } from "@/hooks/useAuth";
+import AmbientBackground from "@/components/AmbientBackground";
 
-const inter = Inter({
+const dmSans = DM_Sans({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-dm-sans",
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  weight: "variable",
+  variable: "--font-fraunces",
+  axes: ["SOFT", "WONK"],
 });
 
 export const metadata: Metadata = {
@@ -19,10 +29,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" data-theme="dark">
-      <body className={inter.className}>
+    <html lang="es" data-theme="dark" className={`${dmSans.variable} ${fraunces.variable}`}>
+      <body className={dmSans.className}>
         <ThemeProvider>
           <AuthProvider>
+            <AmbientBackground />
             {children}
           </AuthProvider>
         </ThemeProvider>

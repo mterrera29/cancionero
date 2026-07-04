@@ -18,9 +18,9 @@ export default function Modal({ children, isOpen, onClose }: ModalProps) {
         style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-xl hover:bg-purple/20 transition-colors z-10"
+          className="absolute top-4 right-4 p-2 rounded-xl hover:bg-terracotta/20 transition-colors z-10"
         >
-          <X className="w-5 h-5 text-purple-pastel" />
+          <X className="w-5 h-5 text-warm-tan" />
         </button>
         {children}
       </div>

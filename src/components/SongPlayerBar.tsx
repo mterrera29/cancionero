@@ -88,12 +88,12 @@ export default function SongPlayerBar({
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl" style={{ background: 'var(--header-bg)', borderTop: '1px solid var(--border-color)' }}>
       <div className="h-1 w-full" style={{ background: 'var(--border-color)' }}>
-        <div className="h-full bg-purple transition-[width] duration-[50ms] linear" style={{ width: `${progress * 100}%` }} />
+        <div className="h-full bg-terracotta transition-[width] duration-[50ms] linear" style={{ width: `${progress * 100}%` }} />
       </div>
       <div className="flex items-center justify-center gap-3 px-4 py-2 max-w-3xl mx-auto">
         <button
           onClick={() => { if (isScrolling) stopAll(); else startScroll(); }}
-          className="flex items-center justify-center w-9 h-9 rounded-xl bg-purple hover:bg-purple-light transition-colors"
+          className="flex items-center justify-center w-9 h-9 rounded-xl bg-warm-tan hover:bg-dusty-rose text-charcoal transition-colors"
         >
           {isScrolling ? <Square className="w-4 h-4 text-white" fill="white" /> : <Play className="w-4 h-4 text-white" fill="white" />}
         </button>
@@ -102,7 +102,7 @@ export default function SongPlayerBar({
           <span className="w-6 text-center">{scrollSpeed.toFixed(1)}x</span>
           <input type="range" min={minSpeed} max={maxSpeed} step={0.05} value={scrollSpeed}
             onChange={e => setScrollSpeed(Number(e.target.value))}
-            className="w-20 md:w-28 h-1 accent-purple cursor-pointer"
+            className="w-20 md:w-28 h-1 accent-terracotta cursor-pointer"
           />
         </div>
 
@@ -110,16 +110,16 @@ export default function SongPlayerBar({
           <span className="w-6 text-center">{delayTime}s</span>
           <input type="range" min={0} max={60} step={1} value={delayTime}
             onChange={e => setDelayTime(Number(e.target.value))}
-            className="w-16 md:w-24 h-1 accent-purple cursor-pointer"
+            className="w-16 md:w-24 h-1 accent-terracotta cursor-pointer"
           />
         </div>
 
         <div className="flex items-center gap-1">
-          <button onClick={() => setCurrentFontSize(Math.min(currentFontSize + 2, 32))} className="p-1.5 rounded-lg hover:bg-purple/20 transition-colors">
+          <button onClick={() => setCurrentFontSize(Math.min(currentFontSize + 2, 32))} className="p-1.5 rounded-lg hover:bg-terracotta/20 transition-colors">
             <Plus className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
           </button>
           <span className="text-xs w-8 text-center" style={{ color: 'var(--text-secondary)' }}>{currentFontSize}px</span>
-          <button onClick={() => setCurrentFontSize(Math.max(currentFontSize - 2, 12))} className="p-1.5 rounded-lg hover:bg-purple/20 transition-colors">
+          <button onClick={() => setCurrentFontSize(Math.max(currentFontSize - 2, 12))} className="p-1.5 rounded-lg hover:bg-terracotta/20 transition-colors">
             <Minus className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>
@@ -128,11 +128,11 @@ export default function SongPlayerBar({
 
         <div className="flex items-center gap-1">
           <AlignLeft className="w-3.5 h-3.5" style={{ color: 'var(--text-muted)' }} />
-          <button onClick={() => setLineHeight(Math.min(lineHeight + 0.2, 3))} className="p-1.5 rounded-lg hover:bg-purple/20 transition-colors">
+          <button onClick={() => setLineHeight(Math.min(lineHeight + 0.2, 3))} className="p-1.5 rounded-lg hover:bg-terracotta/20 transition-colors">
             <Plus className="w-3.5 h-3.5" style={{ color: 'var(--text-secondary)' }} />
           </button>
           <span className="text-xs w-7 text-center" style={{ color: 'var(--text-secondary)' }}>{lineHeight.toFixed(1)}</span>
-          <button onClick={() => setLineHeight(Math.max(lineHeight - 0.2, 1))} className="p-1.5 rounded-lg hover:bg-purple/20 transition-colors">
+          <button onClick={() => setLineHeight(Math.max(lineHeight - 0.2, 1))} className="p-1.5 rounded-lg hover:bg-terracotta/20 transition-colors">
             <Minus className="w-3.5 h-3.5" style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>
@@ -142,21 +142,21 @@ export default function SongPlayerBar({
         <div className="flex items-center gap-0.5">
           <button
             onClick={() => setDisplayMode('vertical')}
-            className={`p-1.5 rounded-lg transition-colors ${displayMode === 'vertical' ? 'bg-purple/20' : 'hover:bg-purple/20'}`}
+            className={`p-1.5 rounded-lg transition-colors ${displayMode === 'vertical' ? 'bg-terracotta/20' : 'hover:bg-terracotta/20'}`}
             title="Vertical (una columna)"
           >
-            <List className="w-3.5 h-3.5" style={{ color: displayMode === 'vertical' ? 'var(--purple-pastel)' : 'var(--text-secondary)' }} />
+            <List className="w-3.5 h-3.5" style={{ color: displayMode === 'vertical' ? 'var(--color-warm-tan)' : 'var(--text-secondary)' }} />
           </button>
           <button
             onClick={() => setDisplayMode('horizontal')}
-            className={`p-1.5 rounded-lg transition-colors ${displayMode === 'horizontal' ? 'bg-purple/20' : 'hover:bg-purple/20'}`}
+            className={`p-1.5 rounded-lg transition-colors ${displayMode === 'horizontal' ? 'bg-terracotta/20' : 'hover:bg-terracotta/20'}`}
             title="Horizontal (columnas automáticas)"
           >
-            <Columns className="w-3.5 h-3.5" style={{ color: displayMode === 'horizontal' ? 'var(--purple-pastel)' : 'var(--text-secondary)' }} />
+            <Columns className="w-3.5 h-3.5" style={{ color: displayMode === 'horizontal' ? 'var(--color-warm-tan)' : 'var(--text-secondary)' }} />
           </button>
         </div>
 
-        <button onClick={onSave} className="p-1.5 rounded-lg hover:bg-purple/20 transition-colors">
+        <button onClick={onSave} className="p-1.5 rounded-lg hover:bg-terracotta/20 transition-colors">
           <Save className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
         </button>
       </div>

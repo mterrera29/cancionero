@@ -9,7 +9,7 @@ export default function Spinner({ size = 'md', inline = false }: SpinnerProps) {
 
   return (
     <div className={containerClass}>
-      <div className={`${sizes[size]} border-purple/20 border-t-purple rounded-full animate-spin`} />
+      <div className={`${sizes[size]} border-terracotta/20 border-t-terracotta rounded-full animate-spin`} />
     </div>
   );
 }

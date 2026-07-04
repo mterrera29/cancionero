@@ -227,7 +227,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
             value={scrapeUrl}
             onChange={e => setScrapeUrl(e.target.value)}
             placeholder="Pegar link de letras (Genius, Letras, etc)..."
-            className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
+            className="flex-1 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-terracotta/50 transition-all"
             style={{ background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
           />
           <button
@@ -252,7 +252,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
               } catch {}
               setScraping(false);
             }}
-            className="px-5 py-3 rounded-xl bg-purple hover:bg-purple-light text-white font-medium transition-all flex items-center gap-2 text-sm shadow-sm hover:shadow-md shrink-0"
+            className="btn-cozy px-5 py-3 bg-warm-tan hover:bg-dusty-rose text-charcoal font-medium transition-all flex items-center gap-2 text-sm shadow-sm hover:shadow-md shrink-0"
             style={{ minWidth: '110px' }}
           >
             {scraping ? (
@@ -271,7 +271,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
           <select
             value={searchMode}
             onChange={e => { setSearchMode(e.target.value as SearchMode); setCandidates([]); setSearchMsg(''); setTrySource(0); setHasMore(false); setCombined(null); }}
-            className="shrink-0 rounded-xl px-3 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all appearance-none"
+            className="shrink-0 rounded-xl px-3 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-terracotta/50 transition-all appearance-none"
             style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
           >
             <option value="lyrics" style={{ background: 'var(--bg-card)' }}>Letra</option>
@@ -286,7 +286,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
               onChange={e => { setSearchTitle(e.target.value); setCandidates([]); setTrySource(0); setHasMore(false); setCombined(null); }}
               onKeyDown={e => e.key === 'Enter' && doSearch()}
               placeholder="Nombre de la canción..."
-              className="flex-1 min-w-0 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
+              className="flex-1 min-w-0 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-terracotta/50 transition-all"
               style={{ background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
             />
             <input
@@ -295,14 +295,14 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
               onChange={e => { setSearchArtist(e.target.value); setTrySource(0); setHasMore(false); }}
               onKeyDown={e => e.key === 'Enter' && doSearch()}
               placeholder="Artista (opcional)..."
-              className="flex-1 min-w-0 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all hidden sm:flex"
+              className="flex-1 min-w-0 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-terracotta/50 transition-all hidden sm:flex"
               style={{ background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
             />
             <button
               id="external-search-btn"
               type="button"
               onClick={() => doSearch()}
-              className="px-5 py-3 rounded-xl bg-purple hover:bg-purple-light text-white font-medium transition-all flex items-center justify-center gap-2 text-sm shadow-sm hover:shadow-md shrink-0"
+              className="px-5 py-3 rounded-xl bg-warm-tan hover:bg-dusty-rose text-charcoal font-medium transition-all flex items-center justify-center gap-2 text-sm shadow-sm hover:shadow-md shrink-0"
               disabled={searching || fetchingLyrics}
               style={{ minWidth: '100px' }}
             >
@@ -341,10 +341,10 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
                 key={i}
                 type="button"
                 onClick={() => selectCandidate(c)}
-                className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-purple/10"
+                className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-terracotta/10"
                 style={{ border: '1px solid var(--border-color)' }}
               >
-                <Search className="w-4 h-4 shrink-0 text-purple-pastel" />
+                <Search className="w-4 h-4 shrink-0 text-warm-tan" />
                 <div className="min-w-0">
                   <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{c.title}</span>
                   <span className="text-xs ml-2" style={{ color: 'var(--text-secondary)' }}>{c.artist}</span>
@@ -355,7 +355,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
               <button
                 type="button"
                 onClick={() => doSearch(trySource + 1)}
-                className="w-full text-center text-sm py-2.5 rounded-xl transition-all hover:bg-purple/5"
+                className="w-full text-center text-sm py-2.5 rounded-xl transition-all hover:bg-terracotta/5"
                 style={{ color: 'var(--text-muted)' }}
               >
                 ¿No encontraste lo que buscabas? Buscar en otra fuente
@@ -382,13 +382,13 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
                 }}
               >
                 <div className="flex items-center justify-between mb-2 sticky top-0" style={{ background: 'var(--bg-card)' }}>
-                  <span className="text-xs font-semibold text-purple-pastel">Letra</span>
+                  <span className="text-xs font-semibold text-warm-tan">Letra</span>
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); retryFetch('lyrics'); }}
                       disabled={fetchingTarget === 'lyrics'}
-                      className="p-1 rounded hover:bg-purple/20 transition-colors"
+                      className="p-1 rounded hover:bg-terracotta/20 transition-colors"
                       title="Buscar en otra fuente"
                     >
                       {fetchingTarget === 'lyrics' ? <Spinner size="sm" inline /> : <RefreshCw className="w-3.5 h-3.5" style={{ color: 'var(--text-muted)' }} />}
@@ -416,13 +416,13 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
                 }}
               >
                 <div className="flex items-center justify-between mb-2 sticky top-0" style={{ background: 'var(--bg-card)' }}>
-                  <span className="text-xs font-semibold text-purple-pastel">Acordes</span>
+                  <span className="text-xs font-semibold text-warm-tan">Acordes</span>
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); retryFetch('chords'); }}
                       disabled={fetchingTarget === 'chords'}
-                      className="p-1 rounded hover:bg-purple/20 transition-colors"
+                      className="p-1 rounded hover:bg-terracotta/20 transition-colors"
                       title="Buscar en otra fuente"
                     >
                       {fetchingTarget === 'chords' ? <Spinner size="sm" inline /> : <RefreshCw className="w-3.5 h-3.5" style={{ color: 'var(--text-muted)' }} />}
@@ -453,7 +453,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
               <button
                 onClick={applyCombined}
                 disabled={!combined.lyrics && !combined.chords}
-                className="flex-1 flex items-center justify-center gap-2 bg-purple hover:bg-purple-light text-white font-medium px-5 py-2.5 rounded-xl transition-all text-sm disabled:opacity-50"
+                className="btn-cozy flex-1 flex items-center justify-center gap-2 bg-warm-tan hover:bg-dusty-rose text-charcoal font-medium px-5 py-2.5 transition-all text-sm disabled:opacity-50"
               >
                 <Check className="w-4 h-4" />
                 Aplicar selección
@@ -467,7 +467,7 @@ export default function SongSearchInputs({ onSongFound }: SongSearchInputsProps)
             <button
               type="button"
               onClick={() => doSearch(trySource + 1)}
-              className="text-sm py-2.5 px-5 rounded-xl transition-all hover:bg-purple/5"
+              className="text-sm py-2.5 px-5 rounded-xl transition-all hover:bg-terracotta/5"
               style={{ color: 'var(--text-muted)' }}
             >
               Buscar en otra fuente

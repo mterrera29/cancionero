@@ -123,7 +123,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
      }} className="space-y-5">
        {editSong && (
          <div className="text-sm font-medium px-4 py-2.5 rounded-xl" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
-           Editando: <span className="text-purple-pastel">{editSong.title}</span>
+           Editando: <span className="text-warm-tan">{editSong.title}</span>
          </div>
        )}
 
@@ -134,7 +134,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
            type="text"
            value={formData.title}
            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-           className="w-full rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
+           className="w-full rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-terracotta/50 transition-all"
            style={{ 
              background: 'var(--input-bg)', 
              border: '1px solid var(--border-color)',
@@ -153,7 +153,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
              type="text"
              value={formData.artist}
              onChange={(e) => setFormData({ ...formData, artist: e.target.value })}
-             className="w-full rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
+             className="w-full rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-terracotta/50 transition-all"
              style={{ 
                background: 'var(--input-bg)', 
                border: '1px solid var(--border-color)',
@@ -168,7 +168,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
            <select
              value={formData.genre}
              onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
-             className="w-full rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all appearance-none"
+             className="w-full rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-terracotta/50 transition-all appearance-none"
              style={{ 
                background: 'var(--input-bg)', 
                border: '1px solid var(--border-color)',
@@ -195,7 +195,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
         <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
           <div className="flex items-center gap-2.5">
             {isPublic ? (
-              <Globe className="w-4 h-4 text-purple-pastel" />
+              <Globe className="w-4 h-4 text-warm-tan" />
             ) : (
               <Lock className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
             )}
@@ -213,7 +213,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
               onChange={(e) => setIsPublic(e.target.checked)}
               className="sr-only peer"
             />
-            <div className="w-10 h-5 rounded-full peer peer-checked:bg-purple bg-gray-600 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-[19px]" />
+            <div className="w-10 h-5 rounded-full peer peer-checked:bg-terracotta bg-gray-600 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-[19px]" />
           </label>
         </div>
 
@@ -226,7 +226,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
                 type="button"
                 onClick={() => fetchMissing('lyrics')}
                 disabled={!!fetching}
-                className="text-xs text-purple hover:text-purple-light transition-colors flex items-center gap-1 font-medium"
+                className="text-xs text-terracotta hover:text-terracotta-light transition-colors flex items-center gap-1 font-medium"
               >
                 {fetching === 'lyrics' ? <Spinner size="sm" inline /> : '+ Buscar letra'}
               </button>
@@ -235,7 +235,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
           <textarea
            value={formData.lyrics}
            onChange={(e) => setFormData({ ...formData, lyrics: e.target.value })}
-           className="w-full rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all min-h-[140px] resize-none"
+           className="w-full rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-terracotta/50 transition-all min-h-[140px] resize-none"
            style={{ 
              background: 'var(--input-bg)', 
              border: '1px solid var(--border-color)',
@@ -254,7 +254,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
                 type="button"
                 onClick={() => fetchMissing('chords')}
                 disabled={!!fetching}
-                className="text-xs text-purple hover:text-purple-light transition-colors flex items-center gap-1 font-medium"
+                className="text-xs text-terracotta hover:text-terracotta-light transition-colors flex items-center gap-1 font-medium"
               >
                 {fetching === 'chords' ? <Spinner size="sm" inline /> : '+ Buscar acordes'}
               </button>
@@ -263,7 +263,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
           <textarea
            value={formData.chords}
            onChange={(e) => setFormData({ ...formData, chords: e.target.value })}
-           className="w-full rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all min-h-[100px] resize-none"
+           className="w-full rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-terracotta/50 transition-all min-h-[100px] resize-none"
            style={{ 
              background: 'var(--input-bg)', 
              border: '1px solid var(--border-color)',
@@ -278,7 +278,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
          <button
            type="submit"
            disabled={loading}
-           className="flex-1 flex items-center justify-center gap-2 bg-purple hover:bg-purple-light text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
+           className="btn-cozy flex-1 flex items-center justify-center gap-2 bg-warm-tan hover:bg-dusty-rose text-charcoal font-semibold px-5 py-3 transition-all shadow-sm hover:shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
          >
            {loading ? (
               <><Spinner size="sm" inline /> Guardando...</>
@@ -289,7 +289,7 @@ export default function NewSongForm({ userId, onClose, onSuccess, editSong, init
          <button
            type="button"
            onClick={onClose}
-           className="flex-1 sm:flex-none px-6 py-3 rounded-xl border border-transparent text-purple-pastel hover:bg-purple/10 transition-colors font-semibold"
+           className="flex-1 sm:flex-none px-6 py-3 rounded-xl border border-transparent text-warm-tan hover:bg-terracotta/10 transition-colors font-semibold"
          >
            Cancelar
          </button>

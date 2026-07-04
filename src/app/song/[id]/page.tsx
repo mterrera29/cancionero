@@ -12,6 +12,8 @@ import { SongDetailSkeleton } from '@/components/Skeleton';
 import { getCachedCover, setCachedCover } from '@/lib/cover-cache';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { useAuth } from '@/hooks/useAuth';
+import CozyCover from '@/components/CozyCover';
+import { Candle } from '@/components/IconsCozy';
 
 export default function SongDetailsPage() {
   const params = useParams();
@@ -148,7 +150,7 @@ export default function SongDetailsPage() {
         <div className="text-center">
           <Music className="w-14 h-14 mx-auto mb-4" style={{ color: 'var(--text-muted)' }} />
           <p className="text-lg mb-4" style={{ color: 'var(--text-secondary)' }}>Canción no encontrada</p>
-          <button onClick={() => router.push('/')} className="bg-purple hover:bg-purple-light text-white px-6 py-2.5 rounded-xl transition-all">Volver</button>
+          <button onClick={() => router.push('/')} className="btn-cozy bg-warm-tan hover:bg-dusty-rose text-charcoal px-6 py-2.5 transition-all">Volver</button>
         </div>
       </div>
     );
@@ -164,7 +166,7 @@ export default function SongDetailsPage() {
             style={{ height: '44px', background: 'var(--header-bg)', borderBottom: '1px solid var(--border-color)' }}
           >
             <div className="flex items-center gap-2 min-w-0 shrink-0">
-              <button onClick={() => router.push('/')} className="shrink-0 p-1.5 rounded-lg hover:bg-purple/20 transition-colors">
+              <button onClick={() => router.back()} className="shrink-0 p-1.5 rounded-lg hover:bg-terracotta/20 transition-colors">
                 <ArrowLeft className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
               </button>
               <span className="text-sm font-medium truncate max-w-[120px] sm:max-w-none" style={{ color: 'var(--text-primary)' }}>{song.title}</span>
@@ -178,7 +180,7 @@ export default function SongDetailsPage() {
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-                    activeTab === tab ? 'bg-purple text-white' : 'hover:bg-purple/10'
+                    activeTab === tab ? 'btn-cozy bg-terracotta text-white' : 'hover:bg-terracotta/10'
                   }`}
                   style={{ color: activeTab === tab ? '#fff' : 'var(--text-secondary)' }}
                 >
@@ -189,8 +191,8 @@ export default function SongDetailsPage() {
 
             {isOwner ? (
               <div className="flex gap-0.5 shrink-0">
-                <button onClick={() => setShowEdit(true)} className="p-1.5 rounded-lg hover:bg-purple/20 transition-colors" title="Editar">
-                  <Edit3 className="w-4 h-4 text-purple-pastel" />
+                <button onClick={() => setShowEdit(true)} className="p-1.5 rounded-lg hover:bg-terracotta/20 transition-colors" title="Editar">
+                  <Edit3 className="w-4 h-4 text-warm-tan" />
                 </button>
                 <button onClick={() => setShowDelete(true)} className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors" title="Eliminar">
                   <Trash2 className="w-4 h-4 text-red-400" />
@@ -218,20 +220,18 @@ export default function SongDetailsPage() {
         /* ── Modo vertical: layout con header y tabs ── */
         <div className="max-w-3xl mx-auto px-6 pb-24 pt-20 animate-fade-in">
           <div className="flex items-start gap-5 mb-8">
-            <button onClick={() => router.push('/')} className="shrink-0 mt-1 p-1.5 rounded-lg hover:bg-purple/20 transition-colors">
+            <button onClick={() => router.back()} className="shrink-0 mt-1 p-1.5 rounded-lg hover:bg-terracotta/20 transition-colors">
               <ArrowLeft className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
             </button>
             {song.cover ? (
-              <Image src={song.cover} alt="" width={80} height={80} className="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-lg" />
+              <Image src={song.cover} alt="" width={80} height={80} className="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-lg animate-float" />
             ) : (
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple to-purple-light flex items-center justify-center shrink-0 shadow-lg">
-                <Music className="w-8 h-8 text-white/60" />
-              </div>
+              <CozyCover seed={`${song.title}-${song.artist}`} genre={song.genre} size={80} className="rounded-2xl shadow-lg animate-float" />
             )}
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h1 className="text-2xl font-bold mb-1 truncate" style={{ color: 'var(--text-primary)' }}>{song.title}</h1>
+                  <h1 className="text-3xl font-heading mb-1 truncate" style={{ color: 'var(--text-primary)' }}>{song.title}</h1>
                   <p className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{song.artist}</p>
                   {!isOwner && song.displayName && (
                     <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
@@ -241,8 +241,8 @@ export default function SongDetailsPage() {
                 </div>
                 {isOwner && (
                   <div className="flex gap-1 shrink-0">
-                    <button onClick={() => setShowEdit(true)} className="p-2 rounded-xl hover:bg-purple/20 transition-colors" title="Editar">
-                      <Edit3 className="w-4 h-4 text-purple-pastel" />
+                    <button onClick={() => setShowEdit(true)} className="p-2 rounded-xl hover:bg-terracotta/20 transition-colors" title="Editar">
+                      <Edit3 className="w-4 h-4 text-warm-tan" />
                     </button>
                     <button onClick={() => setShowDelete(true)} className="p-2 rounded-xl hover:bg-red-500/10 transition-colors" title="Eliminar">
                       <Trash2 className="w-4 h-4 text-red-400" />
@@ -250,7 +250,8 @@ export default function SongDetailsPage() {
                   </div>
                 )}
               </div>
-              <span className="inline-block mt-2 text-[11px] px-2.5 py-1 rounded-full" style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)' }}>{song.genre}</span>
+              <span className="inline-flex items-center gap-1.5 mt-2 text-[11px] px-2.5 py-1 rounded-full" style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)' }}>
+                <Candle className="w-3.5 h-3.5" />{song.genre}</span>
             </div>
           </div>
 
@@ -261,7 +262,7 @@ export default function SongDetailsPage() {
                 onClick={() => setActiveTab(tab)}
                 className={`px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-[1px] ${
                   activeTab === tab
-                    ? 'text-purple-pastel border-purple-pastel'
+                    ? 'text-warm-tan border-warm-tan'
                     : 'border-transparent'
                 }`}
                 style={{ color: activeTab === tab ? undefined : 'var(--text-secondary)' }}
@@ -303,7 +304,7 @@ export default function SongDetailsPage() {
       {userId && (
         <Modal isOpen={showEdit} onClose={() => setShowEdit(false)}>
           <div className="p-6">
-            <h2 className="text-lg font-bold text-purple-pastel mb-6">Editar Canción</h2>
+            <h2 className="text-lg font-bold text-warm-tan mb-6">Editar Canción</h2>
             <NewSongForm
               userId={userId}
               onClose={() => setShowEdit(false)}
@@ -317,20 +318,20 @@ export default function SongDetailsPage() {
       {isOwner && (
         <Modal isOpen={showDelete} onClose={() => setShowDelete(false)}>
           <div className="p-6">
-            <h2 className="text-lg font-bold text-purple-pastel mb-3">Eliminar canción</h2>
+            <h2 className="text-lg font-bold text-warm-tan mb-3">Eliminar canción</h2>
             <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
-              ¿Estás seguro de que querés eliminar <span className="text-purple-pastel font-medium">{song.title}</span>?
+              ¿Estás seguro de que querés eliminar <span className="text-warm-tan font-medium">{song.title}</span>?
             </p>
             <div className="flex gap-3">
               <button
                 onClick={deleteSong}
-                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium px-5 py-3 rounded-xl transition-all"
+                className="btn-cozy flex-1 bg-red-500 hover:bg-red-600 text-white font-medium px-5 py-3 transition-all"
               >
                 Eliminar
               </button>
               <button
                 onClick={() => setShowDelete(false)}
-                className="px-6 py-3 rounded-xl transition-colors"
+                className="btn-cozy px-6 py-3 transition-colors"
                 style={{ border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}
               >
                 Cancelar

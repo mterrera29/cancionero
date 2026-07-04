@@ -9,12 +9,9 @@ import NewSongForm from '@/components/NewSongForm';
 import SongSearchInputs from '@/components/SongSearchInputs';
 import { SongCardSkeleton } from '@/components/Skeleton';
 import Spinner from '@/components/Spinner';
+import { CoffeeCup, Campfire } from '@/components/IconsCozy';
+import CozyCover from '@/components/CozyCover';
 import { useAuth } from '@/hooks/useAuth';
-const COLORS = ['#5c3e91', '#7c3aed', '#a855f7', '#8b5cf6', '#6d28d9', '#4c1d95', '#3b0764', '#701a75'];
-
-function getColor(id: string) {
-  return COLORS[parseInt(id) % COLORS.length];
-}
 
 const LISTS_PER_PAGE = 5;
 
@@ -135,13 +132,13 @@ export default function MisCancionesPage() {
         {!userId && !loading && (
           <div className="text-center py-16 rounded-3xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
             <div className="mx-auto mb-6 w-20 h-20 flex items-center justify-center rounded-2xl" style={{ background: 'var(--bg-secondary)' }}>
-              <Music className="w-10 h-10" style={{ color: 'var(--text-purple)' }} />
+              <Music className="w-10 h-10" style={{ color: 'var(--color-terracotta)' }} />
             </div>
-            <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Mis Canciones</h1>
+            <h1 className="text-3xl font-heading mb-2" style={{ color: 'var(--text-primary)' }}>Mis Canciones</h1>
             <p className="text-base mb-8 max-w-sm mx-auto" style={{ color: 'var(--text-secondary)' }}>Iniciá sesión para ver y gestionar tus canciones.</p>
             <button
               onClick={login}
-              className="inline-flex items-center gap-2 bg-purple hover:bg-purple-light text-white font-semibold px-8 py-3 rounded-xl transition-all shadow-sm hover:shadow-md"
+              className="btn-cozy inline-flex items-center gap-2 bg-warm-tan hover:bg-dusty-rose text-charcoal font-semibold px-8 py-3 transition-all shadow-sm hover:shadow-md"
             >
               <LogIn className="w-5 h-5" /> Ingresar con Google
             </button>
@@ -163,7 +160,7 @@ export default function MisCancionesPage() {
                   key={t}
                   onClick={() => { setTab(t); setArtist(''); setGenre(''); }}
                   className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                    tab === t ? 'bg-purple text-white shadow-sm' : 'hover:bg-purple/10'
+                    tab === t ? 'btn-cozy bg-terracotta text-white shadow-sm' : 'hover:bg-terracotta/10'
                   }`}
                   style={{ color: tab === t ? '#fff' : 'var(--text-secondary)' }}
                 >
@@ -179,7 +176,7 @@ export default function MisCancionesPage() {
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Buscar canción o artista..."
-                  className="w-full rounded-xl pl-12 pr-4 py-3 sm:py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
+                  className="w-full rounded-xl pl-12 pr-4 py-3 sm:py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-terracotta/50 transition-all"
                   style={{ 
                     background: 'var(--input-bg)', 
                     border: '1px solid var(--border-color)',
@@ -189,7 +186,7 @@ export default function MisCancionesPage() {
               </div>
               <button
                 onClick={() => setSort(s => s === 'asc' ? 'desc' : 'asc')}
-                className="px-5 py-3 sm:py-3.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 justify-center"
+                className="btn-cozy px-5 py-3 sm:py-3.5 text-sm font-medium transition-all flex items-center gap-2 justify-center"
                 style={{ 
                   background: 'var(--bg-card)', 
                   border: '1px solid var(--border-color)',
@@ -210,12 +207,12 @@ export default function MisCancionesPage() {
             ) : (
               <div className="space-y-4">
                 {tab === 'artists' && !artist && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 animate-fade-in">
-                    {artists.map(a => (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {artists.map((a, i) => (
                       <button
                         key={a}
                         onClick={() => setArtist(a)}
-                        className="p-4 rounded-xl transition-all text-left hover:shadow-md"
+                        className={`p-4 rounded-xl transition-all text-left hover:shadow-md animate-enter stagger-${Math.min(i + 1, 8)}`}
                         style={{ 
                           background: 'var(--bg-card)', 
                           border: '1px solid var(--border-color)',
@@ -251,7 +248,7 @@ export default function MisCancionesPage() {
                   <div className="space-y-3">
                     {(artist || genre) && (
                       <div className="flex items-center justify-center gap-2 text-sm px-2 pb-2">
-                        <span style={{ color: 'var(--text-secondary)' }}>Filtrando por: <span className="font-medium text-purple-pastel">{artist || genre}</span></span>
+                        <span style={{ color: 'var(--text-secondary)' }}>Filtrando por: <span className="font-medium text-warm-tan">{artist || genre}</span></span>
                         <button
                           onClick={() => { setArtist(''); setGenre(''); }}
                           className="text-pink-400 hover:text-pink-300 hover:underline text-sm transition-colors"
@@ -262,26 +259,23 @@ export default function MisCancionesPage() {
                     )}
 
                     {filtered.length === 0 ? (
-                      <div className="text-center py-16 rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                        <Music className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--text-muted)' }} />
+                      <div className="text-center py-16 rounded-3xl animate-fade-in" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                        <Campfire className="w-20 h-20 mx-auto mb-4 animate-flame" />
                         <p className="text-base" style={{ color: 'var(--text-muted)' }}>No se encontraron canciones</p>
                         <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>Probá con otro término o filtro</p>
                       </div>
                     ) : (
-                      <div className="space-y-1 animate-fade-in">
+                      <div className="space-y-1">
                         {filtered.map((song, i) => (
                           <div
                             key={song.id}
                             onClick={() => router.push(`/song/${song.id}`)}
-                            className="group flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors relative cursor-pointer hover:bg-white/5"
-                            style={{ animationDelay: `${i * 20}ms` }}
+                            className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors relative cursor-pointer hover:bg-white/5 animate-enter stagger-${Math.min(i + 1, 8)}`}
                           >
                             {song.cover ? (
                               <img src={song.cover} alt="" className="w-10 h-10 rounded-md shrink-0 object-cover" />
                             ) : (
-                              <div className="w-10 h-10 rounded-md shrink-0 flex items-center justify-center" style={{ background: getColor(song.id) }}>
-                                <Music className="w-5 h-5 text-white/70" />
-                              </div>
+                              <CozyCover seed={`${song.title}-${song.artist}`} genre={song.genre} size={40} className="rounded-md" />
                             )}
 
                             <div className="absolute left-3 w-10 h-10 rounded-md flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
@@ -300,11 +294,11 @@ export default function MisCancionesPage() {
                             {/* Icono público/privado */}
                             <button
                               onClick={(e) => { e.stopPropagation(); togglePublic(song); }}
-                              className="p-1 rounded-lg hover:bg-purple/20 transition-colors shrink-0"
+                              className="p-1 rounded-lg hover:bg-terracotta/20 transition-colors shrink-0"
                               title={song.isPublic ? 'Hacer privada' : 'Hacer pública'}
                             >
                               {song.isPublic ? (
-                                <Globe className="w-3.5 h-3.5 text-purple-pastel" />
+                                <Globe className="w-3.5 h-3.5 text-warm-tan" />
                               ) : (
                                 <Lock className="w-3.5 h-3.5" style={{ color: 'var(--text-muted)' }} />
                               )}
@@ -329,29 +323,29 @@ export default function MisCancionesPage() {
                                 >
                                   <button
                                     onClick={(e) => { e.stopPropagation(); setEditSong(song); setMenuOpen(null); }}
-                                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-purple/10 transition-colors text-left text-sm"
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-terracotta/10 transition-colors text-left text-sm"
                                     style={{ color: 'var(--text-primary)' }}
                                   >
-                                    <Edit3 className="w-4 h-4 text-purple-pastel" /> Editar
+                                    <Edit3 className="w-4 h-4 text-warm-tan" /> Editar
                                   </button>
                                   <button
                                     onClick={(e) => { e.stopPropagation(); togglePublic(song); }}
-                                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-purple/10 transition-colors text-left text-sm"
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-terracotta/10 transition-colors text-left text-sm"
                                     style={{ color: 'var(--text-primary)' }}
                                   >
                                     {song.isPublic ? (
                                       <Lock className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
                                     ) : (
-                                      <Globe className="w-4 h-4 text-purple-pastel" />
+                                      <Globe className="w-4 h-4 text-warm-tan" />
                                     )}
                                     {song.isPublic ? 'Hacer privada' : 'Hacer pública'}
                                   </button>
                                   <button
                                     onClick={(e) => { e.stopPropagation(); openListModal(song.id); }}
-                                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-purple/10 transition-colors text-left text-sm"
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-terracotta/10 transition-colors text-left text-sm"
                                     style={{ color: 'var(--text-primary)' }}
                                   >
-                                    <ListMusic className="w-4 h-4 text-purple-pastel" /> Agregar a lista
+                                    <ListMusic className="w-4 h-4 text-warm-tan" /> Agregar a lista
                                   </button>
                                   <div className="h-px my-1" style={{ background: 'var(--border-color)' }} />
                                   <button
@@ -378,7 +372,7 @@ export default function MisCancionesPage() {
       {userId && (
         <Modal isOpen={!!editSong} onClose={() => setEditSong(null)}>
           <div className="p-6">
-            <h2 className="text-xl font-bold text-purple-pastel mb-6">Editar Canción</h2>
+            <h2 className="text-xl font-bold text-warm-tan mb-6">Editar Canción</h2>
             <NewSongForm userId={userId} onClose={() => setEditSong(null)} onSuccess={() => { setEditSong(null); loadSongs(); }} editSong={editSong!} />
           </div>
         </Modal>
@@ -387,7 +381,7 @@ export default function MisCancionesPage() {
       {userId && (
         <button
           onClick={() => setShowNewSongModal(true)}
-          className="fixed bottom-6 right-6 z-30 sm:hidden flex items-center justify-center w-14 h-14 rounded-full bg-purple hover:bg-purple-light text-white shadow-lg transition-all"
+           className="fixed bottom-6 right-6 z-30 sm:hidden flex items-center justify-center w-14 h-14 bg-warm-tan hover:bg-dusty-rose text-charcoal shadow-lg transition-all animate-glow-pulse"
         >
           <Plus className="w-6 h-6" />
         </button>
@@ -396,7 +390,7 @@ export default function MisCancionesPage() {
       {userId && (
         <Modal isOpen={showNewSongModal} onClose={() => { setShowNewSongModal(false); setNewSongData(null); }}>
           <div className="p-4 sm:p-6">
-            <h2 className="text-xl font-bold text-purple-pastel mb-6">Nueva Canción</h2>
+            <h2 className="text-xl font-bold text-warm-tan mb-6">Nueva Canción</h2>
             <NewSongForm
               userId={userId}
               onClose={() => { setShowNewSongModal(false); setNewSongData(null); }}
@@ -410,7 +404,7 @@ export default function MisCancionesPage() {
       {/* Modal Agregar a lista */}
       <Modal isOpen={showListModal} onClose={() => { setShowListModal(false); setSelectedSongId(null); }}>
         <div className="p-6">
-          <h2 className="text-lg font-bold text-purple-pastel mb-4">Agregar a lista</h2>
+          <h2 className="text-lg font-bold text-warm-tan mb-4">Agregar a lista</h2>
           {listsLoading ? (
             <div className="text-center py-8"><Spinner size="md" /></div>
           ) : paginatedLists.length === 0 ? (
@@ -424,10 +418,10 @@ export default function MisCancionesPage() {
                   <button
                     key={list.id}
                     onClick={() => addToList(list.id)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left hover:bg-purple/10"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left hover:bg-terracotta/10"
                     style={{ border: '1px solid var(--border-color)' }}
                   >
-                    <ListMusic className="w-4 h-4 text-purple-pastel shrink-0" />
+                    <ListMusic className="w-4 h-4 text-warm-tan shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{list.name}</p>
                       <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{list.songIds.length} canciones</p>
@@ -441,7 +435,7 @@ export default function MisCancionesPage() {
                   <button
                     onClick={() => setListsPage(p => Math.max(0, p - 1))}
                     disabled={listsPage === 0}
-                    className="px-3 py-1.5 text-xs rounded-lg transition-colors disabled:opacity-30 hover:bg-purple/10"
+                    className="px-3 py-1.5 text-xs rounded-lg transition-colors disabled:opacity-30 hover:bg-terracotta/10"
                     style={{ color: 'var(--text-secondary)' }}
                   >
                     Anterior
@@ -452,7 +446,7 @@ export default function MisCancionesPage() {
                   <button
                     onClick={() => setListsPage(p => Math.min(totalListPages - 1, p + 1))}
                     disabled={listsPage >= totalListPages - 1}
-                    className="px-3 py-1.5 text-xs rounded-lg transition-colors disabled:opacity-30 hover:bg-purple/10"
+                    className="px-3 py-1.5 text-xs rounded-lg transition-colors disabled:opacity-30 hover:bg-terracotta/10"
                     style={{ color: 'var(--text-secondary)' }}
                   >
                     Siguiente

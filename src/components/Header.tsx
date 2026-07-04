@@ -38,7 +38,7 @@ export default function Header({ onSongAdded }: HeaderProps) {
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex flex-col items-center justify-center w-10 h-10 gap-1.5 rounded-lg hover:bg-purple/20 transition-colors p-2"
+              className="flex flex-col items-center justify-center w-10 h-10 gap-1.5 rounded-lg hover:bg-terracotta/20 transition-colors p-2"
             >
               <span className={`w-6 h-0.5 rounded-full transition-all ${isMenuOpen ? 'rotate-45 translate-y-[4px]' : ''}`} style={{ background: 'var(--text-primary)' }} />
               <span className={`w-6 h-0.5 rounded-full transition-all ${isMenuOpen ? 'opacity-0' : ''}`} style={{ background: 'var(--text-primary)' }} />
@@ -53,22 +53,29 @@ export default function Header({ onSongAdded }: HeaderProps) {
 
                 {/* Menú lateral */}
                  <div className="relative w-64 h-full animate-slide-in" style={{ background: 'var(--bg-secondary)', borderRight: '1px solid var(--border-color)' }}>
-                   <div className="p-4 border-b border-purple/20">
-                     <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>🔥 Cancionero 🎸</h2>
+                   <div className="p-4 border-b border-terracotta/20">
+                      <h2 className="text-xl font-heading" style={{ color: 'var(--text-primary)' }}>🔥 Cancionero</h2>
                    </div>
                    <div className="p-4 space-y-1">
                       <button
                         onClick={() => { router.push('/mis-canciones'); setIsMenuOpen(false); }}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-purple/10 transition-colors text-left"
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-terracotta/10 transition-colors text-left"
                       >
-                        <Music className="w-5 h-5 text-purple-pastel" />
+                        <Music className="w-5 h-5 text-warm-tan" />
                         <span style={{ color: 'var(--text-primary)' }} className="font-medium">Mis Canciones</span>
                       </button>
                       <button
-                        onClick={() => { router.push('/lists'); setIsMenuOpen(false); }}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-purple/10 transition-colors text-left"
+                        onClick={() => { router.push('/canciones-publicas'); setIsMenuOpen(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-terracotta/10 transition-colors text-left"
                       >
-                        <ListMusic className="w-5 h-5 text-purple-pastel" />
+                        <Music className="w-5 h-5 text-warm-tan" />
+                        <span style={{ color: 'var(--text-primary)' }} className="font-medium">Canciones Públicas</span>
+                      </button>
+                      <button
+                        onClick={() => { router.push('/lists'); setIsMenuOpen(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-terracotta/10 transition-colors text-left"
+                      >
+                        <ListMusic className="w-5 h-5 text-warm-tan" />
                         <span style={{ color: 'var(--text-primary)' }} className="font-medium">Mis Listas</span>
                       </button>
 
@@ -79,7 +86,7 @@ export default function Header({ onSongAdded }: HeaderProps) {
                      {userId && (
                        <button
                          onClick={() => { setIsModalOpen(true); setIsMenuOpen(false); }}
-                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-purple hover:bg-purple-light text-white transition-colors text-left font-medium"
+                          className="btn-cozy w-full flex items-center gap-3 px-4 py-3 bg-warm-tan hover:bg-dusty-rose text-charcoal transition-colors text-left font-medium"
                        >
                          <Plus className="w-5 h-5" />
                          <span>Nueva Canción</span>
@@ -102,13 +109,15 @@ export default function Header({ onSongAdded }: HeaderProps) {
         </div>
 
         {/* Logo (centrado) */}
-        <h1
-          className="text-xl font-bold cursor-pointer select-none whitespace-nowrap"
-          style={{ color: 'var(--text-primary)' }}
-          onClick={() => router.push('/')}
-        >
-          🔥 Cancionero 🎸
-        </h1>
+        <div className="flex items-center gap-2">
+          <h1
+            className="text-2xl font-heading cursor-pointer select-none whitespace-nowrap animate-float"
+            style={{ color: 'var(--text-primary)' }}
+            onClick={() => router.push('/')}
+          >
+            🔥 Cancionero
+          </h1>
+        </div>
 
         {/* Usuario y acciones (derecha) */}
         <div className="flex items-center gap-2">
@@ -117,13 +126,13 @@ export default function Header({ onSongAdded }: HeaderProps) {
               {/* Usuario y cerrar sesión */}
               <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl hover:bg-white/5 transition-colors">
                 {user.photoURL ? (
-                  <Image src={user.photoURL} alt="" width={32} height={32} className="w-8 h-8 rounded-full border-2 border-purple/30" />
+                  <Image src={user.photoURL} alt="" width={32} height={32} className="w-8 h-8 rounded-full border-2 border-terracotta/30" />
                 ) : (
-                  <UserIcon className="w-6 h-6 text-purple-pastel" />
+                  <UserIcon className="w-6 h-6 text-warm-tan" />
                 )}
                 <button
                   onClick={logout}
-                  className="p-1.5 rounded-lg hover:bg-purple/20 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-terracotta/20 transition-colors"
                   title="Cerrar sesión"
                 >
                   <LogOut className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
@@ -133,7 +142,7 @@ export default function Header({ onSongAdded }: HeaderProps) {
           ) : (
             <button
               onClick={login}
-              className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white font-medium px-5 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md"
+              className="btn-cozy flex items-center gap-2 bg-warm-tan hover:bg-dusty-rose text-charcoal font-medium px-5 py-2.5 transition-all shadow-sm hover:shadow-md"
             >
               <LogIn className="w-4 h-4" />
               <span className="hidden sm:block">Ingresar</span>
@@ -145,7 +154,7 @@ export default function Header({ onSongAdded }: HeaderProps) {
       {userId && (
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <div className="p-6">
-            <h2 className="text-lg font-bold text-purple-pastel mb-6">Nueva Canción</h2>
+            <h2 className="text-lg font-bold text-warm-tan mb-6">Nueva Canción</h2>
             <NewSongForm
               userId={userId}
               onClose={() => setIsModalOpen(false)}
