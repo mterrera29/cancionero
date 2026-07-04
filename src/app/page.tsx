@@ -1,108 +1,94 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Music, LogIn } from 'lucide-react';
-import SongCard from '@/components/SongCard';
-import { SongListSkeleton } from '@/components/Skeleton';
+import { Music, LogIn, Users } from 'lucide-react';
 import Header from '@/components/Header';
+import { BonfireHero } from '@/components/BonfireHero';
 import { useAuth } from '@/hooks/useAuth';
-import type { Song } from '@/types';
 
-export default function PublicSongsPage() {
+const FEATURES = [
+  { icon: '🎵', title: 'Letras y Acordes', desc: 'Buscá canciones, guardá tus favoritas y accedé a las letras con acordes en un solo lugar.' },
+  { icon: '🔥', title: 'Modo Fogón', desc: 'Activá el scroll automático con velocidad ajustable y disfrutá mientras tocás.' },
+  { icon: '📋', title: 'Listas Inteligentes', desc: 'Agrupá canciones por setlist, género o lo que se te ocurra.' },
+  { icon: '🌙', title: 'Modo Horizontal', desc: 'Dos columnas simultáneas para ver letra y acordes lado a lado.' },
+];
+
+export default function HomePage() {
   const router = useRouter();
-  const { userId, login, loading: authLoading } = useAuth();
-  const [songs, setSongs] = useState<Song[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-
-  const loadSongs = useCallback(async (q?: string) => {
-    setLoading(true);
-    try {
-      const url = q
-        ? `/api/songs/public?q=${encodeURIComponent(q)}`
-        : '/api/songs/public';
-      const r = await fetch(url);
-      if (r.ok) {
-        const data = await r.json();
-        setSongs(data);
-      }
-    } catch {
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadSongs();
-  }, [loadSongs]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      loadSongs(search || undefined);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [search, loadSongs]);
+  const { userId, login } = useAuth();
 
   return (
-    <main className="min-h-screen pb-20" style={{ background: 'var(--bg-primary)' }}>
-      <Header onSongAdded={loadSongs} />
+    <main className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+      <Header />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-        <h1 className="text-2xl font-bold text-center sm:text-left" style={{ color: 'var(--text-primary)' }}>
-          Canciones Públicas
-        </h1>
-
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar canciones públicas por título o artista..."
-            className="w-full rounded-xl pl-12 pr-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple/50 transition-all"
-            style={{
-              background: 'var(--input-bg)',
-              border: '1px solid var(--border-color)',
-              color: 'var(--text-primary)',
-            }}
-          />
-        </div>
-
-        {/* Results */}
-        {loading ? (
-          <SongListSkeleton />
-        ) : songs.length === 0 ? (
-          <div className="text-center py-16 rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-            <Music className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--text-muted)' }} />
-            <p className="text-base" style={{ color: 'var(--text-muted)' }}>
-              {search ? 'No se encontraron canciones públicas' : 'Aún no hay canciones públicas'}
-            </p>
-            <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
-              {search
-                ? 'Probá con otro término de búsqueda'
-                : 'Los usuarios pueden hacer públicas sus canciones desde el editor'
-              }
-            </p>
+      {/* ── Hero ── */}
+      <section className="relative overflow-hidden pt-8 sm:pt-12 pb-12 sm:pb-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center">
+          <div className="relative mb-6">
+            <BonfireHero className="w-48 h-48 sm:w-64 sm:h-64 animate-cozy-bounce" />
           </div>
-        ) : (
-          <div className="space-y-3 animate-fade-in">
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              {songs.length} {songs.length === 1 ? 'canción pública' : 'canciones públicas'}
-            </p>
-            {songs.map((song) => (
-              <SongCard
-                key={song.id}
-                song={song}
-                userId={userId || ''}
-                onDelete={() => {}}
-                onEdit={() => {}}
-                showAuthor
-              />
+
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading mb-4 tracking-tight" style={{ color: 'var(--text-primary)' }}>
+            Cancionero
+          </h1>
+          <p className="text-base sm:text-lg max-w-lg mx-auto mb-8" style={{ color: 'var(--text-secondary)' }}>
+            Tus canciones, tus acordes, tu fogón. Guardá letras, seguí el ritmo y llevá tu repertorio a todas partes.
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {!userId && (
+              <button
+                onClick={login}
+                className="btn-cozy inline-flex items-center gap-2 bg-warm-tan hover:bg-dusty-rose text-charcoal font-semibold px-8 py-3.5 transition-all shadow-md hover:shadow-lg text-base hover:scale-105"
+              >
+                <LogIn className="w-5 h-5" /> Comenzar
+              </button>
+            )}
+            <button
+              onClick={() => router.push('/canciones-publicas')}
+              className="btn-cozy inline-flex items-center gap-2 bg-warm-tan/15 hover:bg-warm-tan/30 text-warm-tan font-semibold px-7 py-3.5 transition-all shadow-sm hover:shadow-md text-base hover:scale-105 border border-warm-tan/40"
+            >
+              <Users className="w-5 h-5" /> Canciones Públicas
+            </button>
+            {userId && (
+              <button
+                onClick={() => router.push('/mis-canciones')}
+                className="btn-cozy inline-flex items-center gap-2 bg-dusty-rose/15 hover:bg-dusty-rose/30 text-dusty-rose font-semibold px-7 py-3.5 transition-all shadow-sm hover:shadow-md text-base hover:scale-105 border border-dusty-rose/40"
+              >
+                <Music className="w-5 h-5" /> Mis Canciones
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Features ── */}
+      <section className="py-12 sm:py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            {FEATURES.map((f, i) => (
+              <div
+                key={f.title}
+                className={`rounded-2xl p-5 sm:p-6 transition-all hover:scale-[1.02] animate-enter stagger-${Math.min(i + 1, 4)}`}
+                style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+              >
+                <span className="text-2xl mb-3 block">{f.icon}</span>
+                <h3 className="text-base font-heading mb-1.5" style={{ color: 'var(--text-primary)' }}>{f.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{f.desc}</p>
+              </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer className="py-8 border-t" style={{ borderColor: 'var(--border-color)' }}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            Cancionero — hecho con ❤️ y 🔥 para músicos
+          </p>
+        </div>
+      </footer>
     </main>
   );
 }

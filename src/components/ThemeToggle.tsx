@@ -9,13 +9,13 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="p-2 rounded-xl hover:bg-purple/20 transition-colors"
+      className="p-2 rounded-xl hover:bg-terracotta/20 transition-colors"
       title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
     >
       {theme === 'dark' ? (
-        <Sun className="w-4 h-4 text-purple-pastel" />
+        <Sun className="w-4 h-4 text-warm-tan" />
       ) : (
-        <Moon className="w-4 h-4 text-purple" />
+        <Moon className="w-4 h-4 text-terracotta" />
       )}
     </button>
   );
