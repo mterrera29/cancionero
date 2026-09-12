@@ -19,8 +19,8 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Cancionero",
-  description: "Tu aplicación de letras y acordes",
+  title: "fogon.app",
+  description: "Letras y acordes para artistas",
 };
 
 export default function RootLayout({
