@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { Music, ListMusic, Plus, LogIn, LogOut, User as UserIcon } from 'lucide-react';
+import { Flame, Music, ListMusic, Plus, LogIn, LogOut, User as UserIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Modal from './Modal';
 import NewSongForm from './NewSongForm';
@@ -54,7 +54,7 @@ export default function Header({ onSongAdded }: HeaderProps) {
                 {/* Menú lateral */}
                  <div className="relative w-64 h-full animate-slide-in" style={{ background: 'var(--bg-secondary)', borderRight: '1px solid var(--border-color)' }}>
                    <div className="p-4 border-b border-terracotta/20">
-                      <h2 className="text-xl font-heading" style={{ color: 'var(--text-primary)' }}>🔥 Cancionero</h2>
+                       <h2 className="flex items-center gap-2 text-xl font-heading" style={{ color: 'var(--text-primary)' }}><Flame className="size-4 text-fogon-light" /> fogon</h2>
                    </div>
                    <div className="p-4 space-y-1">
                       <button
@@ -111,11 +111,11 @@ export default function Header({ onSongAdded }: HeaderProps) {
         {/* Logo (centrado) */}
         <div className="flex items-center gap-2">
           <h1
-            className="text-2xl font-heading cursor-pointer select-none whitespace-nowrap animate-float"
+            className="flex items-center gap-2 text-2xl font-heading cursor-pointer select-none whitespace-nowrap"
             style={{ color: 'var(--text-primary)' }}
             onClick={() => router.push('/')}
           >
-            🔥 Cancionero
+            <Flame className="size-5 text-fogon-light" /> fogon
           </h1>
         </div>
 

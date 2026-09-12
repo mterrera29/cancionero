@@ -1,5 +1,7 @@
 'use client';
 
+import { BonfireHero } from './BonfireHero';
+
 function hashSeed(s: string): number {
   let h = 0;
   for (let i = 0; i < s.length; i++) {
@@ -55,25 +57,6 @@ const PATTERNS = [
   'radial-gradient(circle at 20% 70%, rgba(255,255,255,0.09) 0%, transparent 40%)',
 ];
 
-function FlameIcon({ className = "absolute inset-0 w-full h-full p-2 opacity-45" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 40 40" className={className} aria-hidden="true">
-      <path
-        d="M20 36 C12 36,7 31,9 24 C11 19,14 13,18 8 C19 6,20 4,21 3 C23 7,25 12,28 17 C31 22,33 28,29 34 C27 36,24 36,20 36Z"
-        fill="rgba(255,255,255,0.5)"
-      />
-      <path
-        d="M20 32 C15 32,12 29,13 24 C14 20,17 16,20 10 C23 16,26 20,27 24 C28 29,25 32,20 32Z"
-        fill="rgba(255,255,255,0.25)"
-      />
-    </svg>
-  );
-}
-
-function GenreSvg() {
-  return <FlameIcon />;
-}
-
 interface CozyCoverProps {
   seed: string;
   genre?: string;
@@ -94,6 +77,7 @@ export default function CozyCover({ seed, genre, size = 80, className = '' }: Co
   }
 
   const pattern = PATTERNS[h % PATTERNS.length];
+  const angle = 120 + (h % 4) * 18;
 
   return (
     <div
@@ -101,13 +85,15 @@ export default function CozyCover({ seed, genre, size = 80, className = '' }: Co
       style={{
         width: size,
         height: size,
-        borderRadius: size > 60 ? 16 : 10,
-        background: `linear-gradient(135deg, ${palette[0]}, ${palette[1]}, ${palette[2]})`,
+        borderRadius: size > 60 ? 20 : 10,
+        background: `linear-gradient(${angle}deg, ${palette[2]}, ${palette[1]} 54%, ${palette[0]})`,
         position: 'relative',
       }}
     >
       <div style={{ position: 'absolute', inset: 0, background: pattern }} />
-      <GenreSvg />
+      <div style={{ position: 'absolute', width: '75%', height: '75%', left: '-25%', bottom: '-35%', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.42)', filter: 'blur(18px)' }} />
+      <div style={{ position: 'absolute', width: '42%', height: '42%', right: '-15%', top: '-15%', borderRadius: '50%', border: '1px solid rgba(255,255,255,0.18)' }} />
+      <BonfireHero className="absolute inset-[7%] h-[86%] w-[86%]" />
     </div>
   );
 }

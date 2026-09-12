@@ -3,5 +3,5 @@
 import EmberParticles from './EmberParticles';
 
 export default function AmbientBackground() {
-  return <EmberParticles count={10} />;
+  return <EmberParticles count={24} />;
 }

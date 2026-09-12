@@ -11,6 +11,8 @@
   --color-charcoal-light: #27211D;
   --color-cream: #F5EDE3;
   --color-paper: #F0EBE3;
+  --color-fogon: #F58A45;
+  --color-fogon-light: #FDB174;
 }
 
 :root {
@@ -90,10 +92,10 @@ body {
 .animate-slide-in { animation: slideIn 0.25s ease-out; }
 
 @keyframes ember-rise {
-  0% { opacity: 0; transform: translateY(0) translateX(0) scale(0.3); }
-  10% { opacity: 1; }
-  80% { opacity: 0.5; }
-  100% { opacity: 0; transform: translateY(-200px) translateX(25px) scale(1.5); }
+  0% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.2) rotate(0deg); }
+  12% { opacity: 0.95; }
+  55% { transform: translate3d(var(--ember-mid-drift), var(--ember-mid-peak), 0) scale(0.8) rotate(100deg); }
+  100% { opacity: 0; transform: translate3d(var(--ember-drift), var(--ember-peak), 0) scale(0.25) rotate(220deg); }
 }
 
 @keyframes ember-rise-2 {
@@ -156,6 +158,45 @@ body {
   75% { transform: scaleY(1.03) scaleX(0.98); opacity: 0.95; }
 }
 .animate-flame { animation: flame-flicker 2.5s ease-in-out infinite; }
+
+@keyframes bonfire-spark-one {
+  0%, 12% { opacity: 0; transform: translate(0, 0) scale(0.25); }
+  28% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-30px, -105px) scale(0.35); }
+}
+@keyframes bonfire-spark-two {
+  0%, 18% { opacity: 0; transform: translate(0, 0) scale(0.2); }
+  32% { opacity: 1; }
+  100% { opacity: 0; transform: translate(36px, -122px) scale(0.25); }
+}
+@keyframes bonfire-spark-three {
+  0%, 8% { opacity: 0; transform: translate(0, 0) scale(0.3); }
+  22% { opacity: .95; }
+  100% { opacity: 0; transform: translate(6px, -138px) scale(0.2); }
+}
+.bonfire-spark {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.bonfire-spark-one { animation: bonfire-spark-one 2.8s ease-out .2s infinite; }
+.bonfire-spark-two { animation: bonfire-spark-two 3.3s ease-out .8s infinite; }
+.bonfire-spark-three { animation: bonfire-spark-three 3.7s ease-out 1.3s infinite; }
+.bonfire-spark-four { animation: bonfire-spark-one 3.2s ease-out 1.6s infinite; }
+.bonfire-spark-five { animation: bonfire-spark-two 3.5s ease-out 2s infinite; }
+
+.hero-halo {
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.2) 0%, rgba(234, 88, 12, 0.07) 38%, transparent 70%);
+  filter: blur(8px);
+}
+
+.bonfire-stage {
+  background: radial-gradient(circle at 50% 75%, rgba(234, 88, 12, 0.22), transparent 38%), linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.015));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 28px 75px rgba(0, 0, 0, 0.24);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+}
 
 @keyframes warm-shimmer {
   0%, 100% { background-position: 0% 50%; }

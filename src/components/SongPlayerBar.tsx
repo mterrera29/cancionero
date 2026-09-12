@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Play, Square, Plus, Minus, Save, AlignLeft, List, Columns } from 'lucide-react';
+import { Play, Square, Plus, Minus, AlignLeft } from 'lucide-react';
 
 interface SongPlayerBarProps {
   fontSizeLyrics: number;
@@ -11,20 +11,18 @@ interface SongPlayerBarProps {
   lineHeight: number;
   setLineHeight: (n: number) => void;
   displayMode: 'vertical' | 'horizontal';
-  setDisplayMode: (m: 'vertical' | 'horizontal') => void;
   scrollSpeed: number;
   setScrollSpeed: (n: number) => void;
   delayTime: number;
   setDelayTime: (n: number) => void;
   activeTab: string;
-  onSave: () => void;
   horizontalScrollRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function SongPlayerBar({
   fontSizeLyrics, fontSizeChords, setFontSizeLyrics, setFontSizeChords, lineHeight, setLineHeight,
-  displayMode, setDisplayMode,
-  scrollSpeed, setScrollSpeed, delayTime, setDelayTime, activeTab, onSave, horizontalScrollRef,
+  displayMode,
+  scrollSpeed, setScrollSpeed, delayTime, setDelayTime, activeTab, horizontalScrollRef,
 }: SongPlayerBarProps) {
   const minSpeed = 0.1;
   const maxSpeed = 1;
@@ -137,28 +135,6 @@ export default function SongPlayerBar({
           </button>
         </div>
 
-        <div className="w-px h-6" style={{ background: 'var(--border-color)' }} />
-
-        <div className="flex items-center gap-0.5">
-          <button
-            onClick={() => setDisplayMode('vertical')}
-            className={`p-1.5 rounded-lg transition-colors ${displayMode === 'vertical' ? 'bg-terracotta/20' : 'hover:bg-terracotta/20'}`}
-            title="Vertical (una columna)"
-          >
-            <List className="w-3.5 h-3.5" style={{ color: displayMode === 'vertical' ? 'var(--color-warm-tan)' : 'var(--text-secondary)' }} />
-          </button>
-          <button
-            onClick={() => setDisplayMode('horizontal')}
-            className={`p-1.5 rounded-lg transition-colors ${displayMode === 'horizontal' ? 'bg-terracotta/20' : 'hover:bg-terracotta/20'}`}
-            title="Horizontal (columnas automáticas)"
-          >
-            <Columns className="w-3.5 h-3.5" style={{ color: displayMode === 'horizontal' ? 'var(--color-warm-tan)' : 'var(--text-secondary)' }} />
-          </button>
-        </div>
-
-        <button onClick={onSave} className="p-1.5 rounded-lg hover:bg-terracotta/20 transition-colors">
-          <Save className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
-        </button>
       </div>
     </div>
   );

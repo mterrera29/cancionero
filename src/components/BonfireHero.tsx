@@ -1,36 +1,36 @@
-export function BonfireHero({ className = "w-64 h-64" }: { className?: string }) {
+export function BonfireHero({ className = 'w-64 h-64' }: { className?: string }) {
   return (
-    <svg viewBox="0 0 140 200" fill="none" className={className} aria-hidden="true">
+    <svg viewBox="0 0 260 280" fill="none" className={className} aria-hidden="true">
       <defs>
-        <radialGradient id="glow" cx="70" cy="120" r="50%">
-          <stop offset="0%" stopColor="#D97706" stopOpacity="0.2" />
-          <stop offset="60%" stopColor="#D97706" stopOpacity="0.05" />
-          <stop offset="100%" stopColor="#D97706" stopOpacity="0" />
+        <radialGradient id="bonfire-glow" cx="50%" cy="64%" r="48%">
+          <stop offset="0%" stopColor="#FED7AA" stopOpacity=".82" />
+          <stop offset="28%" stopColor="#FB923C" stopOpacity=".34" />
+          <stop offset="68%" stopColor="#EA580C" stopOpacity=".09" />
+          <stop offset="100%" stopColor="#EA580C" stopOpacity="0" />
         </radialGradient>
+        <linearGradient id="outer-flame" x1="80" y1="230" x2="177" y2="47" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#C2410C" /><stop offset=".55" stopColor="#EA580C" /><stop offset="1" stopColor="#FB923C" />
+        </linearGradient>
+        <linearGradient id="inner-flame" x1="130" y1="218" x2="130" y2="88" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#EA580C" /><stop offset=".55" stopColor="#FB923C" /><stop offset="1" stopColor="#FED7AA" />
+        </linearGradient>
+        <filter id="fire-blur"><feGaussianBlur stdDeviation="8" /></filter>
       </defs>
-
-      <circle cx="70" cy="120" r="65" fill="url(#glow)" />
-
-      <path d="M55 185 C30 185 10 155 15 120 C20 85 36 48 60 22 C63 18 67 14 70 22 C96 48 112 85 117 120 C122 155 105 185 78 185 C73 188 60 188 55 185Z" fill="#D97706" opacity="0.5" />
-      <path d="M58 179 C35 179 16 151 21 120 C26 90 40 55 62 32 C65 28 68 24 71 32 C92 55 106 90 111 120 C116 151 100 179 78 179 C74 182 62 182 58 179Z" fill="#F59E0B" opacity="0.7" />
-      <path d="M61 173 C40 173 22 147 27 120 C32 95 44 62 64 42 C66 38 69 34 72 42 C88 62 100 95 105 120 C110 147 95 173 78 173 C74 176 64 176 61 173Z" fill="#FDE68A" opacity="0.6" />
-      <path d="M64 167 C46 167 30 143 34 120 C38 100 48 72 66 54 C68 50 70 46 72 54 C84 72 94 100 98 120 C102 143 90 167 78 167 C74 170 68 170 64 167Z" fill="#FEF9C3" opacity="0.5" />
-
-      <path d="M40 182 C36 174 32 168 38 162 C44 168 46 174 40 182Z" fill="#EA580C" opacity="0.4" />
-      <path d="M95 182 C99 174 103 168 97 162 C91 168 89 174 95 182Z" fill="#EA580C" opacity="0.4" />
-      <path d="M35 186 C32 180 28 176 34 170 C40 176 40 180 35 186Z" fill="#D97706" opacity="0.3" />
-      <path d="M100 186 C103 180 107 176 101 170 C95 176 95 180 100 186Z" fill="#D97706" opacity="0.3" />
-
-      <circle cx="22" cy="65" r="1.5" fill="#FDE68A" />
-      <circle cx="118" cy="70" r="1.5" fill="#FDE68A" />
-      <circle cx="35" cy="30" r="1" fill="#FEF9C3" />
-      <circle cx="105" cy="35" r="1" fill="#FEF9C3" />
-      <circle cx="55" cy="14" r="1.2" fill="#FDE68A" />
-      <circle cx="80" cy="16" r="1.2" fill="#FDE68A" />
-      <circle cx="15" cy="45" r="1" fill="#F59E0B" />
-      <circle cx="125" cy="50" r="1" fill="#F59E0B" />
-      <circle cx="45" cy="50" r="1" fill="#FEF9C3" />
-      <circle cx="90" cy="52" r="1" fill="#FEF9C3" />
+      <ellipse cx="130" cy="195" rx="118" ry="82" fill="url(#bonfire-glow)" />
+      <ellipse cx="130" cy="226" rx="82" ry="13" fill="#090706" opacity=".48" />
+      <g opacity=".58" filter="url(#fire-blur)"><path d="M130 226C69 226 70 169 94 128c18-31 21-64 17-84 41 29 57 64 55 91 17-20 27-40 26-62 34 43 34 90 7 128-15 21-38 25-69 25Z" fill="#F97316" /></g>
+      <path d="M130 226c-46 0-69-32-63-70 5-32 31-54 38-87 3-15 2-28-2-39 43 25 60 67 49 106 19-18 29-39 28-59 31 42 27 88 1 119-14 17-30 30-51 30Z" fill="url(#outer-flame)" />
+      <path d="M133 219c-28 0-43-20-38-45 4-20 22-37 25-59 2-11 1-21-2-29 27 20 37 47 29 70 13-12 19-25 19-39 20 29 16 61-3 83-9 11-18 19-30 19Z" fill="url(#inner-flame)" />
+      <path d="M133 215c-14 0-24-11-22-25 2-12 12-22 15-36 14 15 17 31 11 45 7-6 10-13 10-21 11 15 8 28-2 37Z" fill="#FED7AA" opacity=".92" />
+      <path d="M63 220 183 242" stroke="#5C2D18" strokeWidth="17" strokeLinecap="round" /><path d="m77 218 104 24" stroke="#8D4923" strokeWidth="9" strokeLinecap="round" />
+      <path d="m197 220-120 22" stroke="#6B341B" strokeWidth="17" strokeLinecap="round" /><path d="m184 218-104 23" stroke="#9B5529" strokeWidth="9" strokeLinecap="round" />
+      <g className="bonfire-sparks">
+        <circle className="bonfire-spark bonfire-spark-one" cx="113" cy="148" r="3.5" fill="#FED7AA" />
+        <circle className="bonfire-spark bonfire-spark-two" cx="151" cy="143" r="3" fill="#FB923C" />
+        <circle className="bonfire-spark bonfire-spark-three" cx="128" cy="127" r="2.5" fill="#FFEDD5" />
+        <circle className="bonfire-spark bonfire-spark-four" cx="102" cy="165" r="2.5" fill="#F97316" />
+        <circle className="bonfire-spark bonfire-spark-five" cx="162" cy="163" r="3" fill="#FED7AA" />
+      </g>
     </svg>
   );
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowLeft, Music, Edit3, Trash2 } from 'lucide-react';
+import { ArrowLeft, Music, Edit3, Trash2, List, Columns } from 'lucide-react';
 import SongContentView from '@/components/SongContentView';
 import SongPlayerBar from '@/components/SongPlayerBar';
 import Modal from '@/components/Modal';
@@ -34,6 +34,8 @@ export default function SongDetailsPage() {
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const horizontalScrollRef = useRef<HTMLDivElement | null>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInitialLoad = useRef(true);
 
   // Cargar/recargar canción
   const loadSong = useCallback(async () => {
@@ -70,6 +72,7 @@ export default function SongDetailsPage() {
       setSong(null);
     } finally {
       setLoading(false);
+      isInitialLoad.current = false;
     }
   }, [userId, params.id]);
 
@@ -142,6 +145,13 @@ export default function SongDetailsPage() {
     });
   }
 
+  useEffect(() => {
+    if (isInitialLoad.current) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(saveSettings, 500);
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+  }, [fontSizeLyrics, fontSizeChords, lineHeight, displayMode]);
+
   if (loading) return <SongDetailSkeleton />;
 
   if (!song) {
@@ -187,6 +197,21 @@ export default function SongDetailsPage() {
                   {{ lyrics: 'Letra', chords: 'Acordes' }[tab]}
                 </button>
               ))}
+              <span className="w-px h-5 mx-1" style={{ background: 'var(--border-color)' }} />
+              <button
+                onClick={() => setDisplayMode('vertical')}
+                className="p-1.5 rounded-lg transition-all hover:bg-terracotta/15"
+                title="Vertical"
+              >
+                <List className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
+              </button>
+              <button
+                onClick={() => setDisplayMode('horizontal')}
+                className="p-1.5 rounded-lg transition-all bg-terracotta/25"
+                title="Horizontal"
+              >
+                <Columns className="w-4 h-4" style={{ color: 'var(--color-warm-tan)' }} />
+              </button>
             </div>
 
             {isOwner ? (
@@ -255,7 +280,7 @@ export default function SongDetailsPage() {
             </div>
           </div>
 
-          <div className="flex mb-6" style={{ borderBottom: '1px solid var(--border-color)' }}>
+          <div className="flex items-center mb-6" style={{ borderBottom: '1px solid var(--border-color)' }}>
             {['lyrics', 'chords'].map(tab => (
               <button
                 key={tab}
@@ -270,6 +295,22 @@ export default function SongDetailsPage() {
                 {{ lyrics: 'Letra', chords: 'Acordes' }[tab]}
               </button>
             ))}
+            <div className="flex items-center gap-1 ml-auto">
+              <button
+                onClick={() => setDisplayMode('vertical')}
+                className="p-1.5 rounded-lg transition-all bg-terracotta/25"
+                title="Vertical"
+              >
+                <List className="w-4 h-4" style={{ color: 'var(--color-warm-tan)' }} />
+              </button>
+              <button
+                onClick={() => setDisplayMode('horizontal')}
+                className="p-1.5 rounded-lg transition-all hover:bg-terracotta/15"
+                title="Horizontal"
+              >
+                <Columns className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
+              </button>
+            </div>
           </div>
 
           <SongContentView
@@ -291,13 +332,11 @@ export default function SongDetailsPage() {
         lineHeight={lineHeight}
         setLineHeight={setLineHeight}
         displayMode={displayMode}
-        setDisplayMode={setDisplayMode}
         scrollSpeed={scrollSpeed}
         setScrollSpeed={setScrollSpeed}
         delayTime={delayTime}
         setDelayTime={setDelayTime}
         activeTab={activeTab}
-        onSave={saveSettings}
         horizontalScrollRef={horizontalScrollRef}
       />
 
