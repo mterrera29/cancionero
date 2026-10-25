@@ -6,6 +6,9 @@ import Image from 'next/image';
 import { ArrowLeft, Music, Edit3, Trash2, List, Columns } from 'lucide-react';
 import SongContentView from '@/components/SongContentView';
 import SongPlayerBar from '@/components/SongPlayerBar';
+import LyricFollowControls, { LyricFollowNotice } from '@/components/LyricFollowControls';
+import { useLyricAudioFollow } from '@/hooks/useLyricAudioFollow';
+import { inferRecognitionLang } from '@/lib/speech-follow';
 import Modal from '@/components/Modal';
 import NewSongForm from '@/components/NewSongForm';
 import { SongDetailSkeleton } from '@/components/Skeleton';
@@ -36,6 +39,15 @@ export default function SongDetailsPage() {
   const horizontalScrollRef = useRef<HTMLDivElement | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInitialLoad = useRef(true);
+
+  const activeLyricText = song
+    ? (activeTab === 'chords' ? (song.chords ?? '') : (song.lyrics ?? ''))
+    : '';
+  const recognitionLang = inferRecognitionLang({
+    language: typeof song?.language === 'string' ? song.language : null,
+    lyrics: String(song?.lyrics || song?.chords || ''),
+  });
+  const audioFollow = useLyricAudioFollow(activeLyricText, recognitionLang);
 
   // Cargar/recargar canción
   const loadSong = useCallback(async () => {
@@ -212,6 +224,13 @@ export default function SongDetailsPage() {
               >
                 <Columns className="w-4 h-4" style={{ color: 'var(--color-warm-tan)' }} />
               </button>
+              <span className="w-px h-5 mx-1" style={{ background: 'var(--border-color)' }} />
+              <LyricFollowControls
+                listening={audioFollow.listening}
+                paused={audioFollow.paused}
+                onToggleListen={audioFollow.toggleListening}
+                onTogglePause={audioFollow.togglePaused}
+              />
             </div>
 
             {isOwner ? (
@@ -229,16 +248,22 @@ export default function SongDetailsPage() {
               </span>
             ) : null}
           </div>
-          <div className="w-full" style={{ height: 'calc(100vh - 44px - 72px)' }}>
-            <SongContentView
-              lyrics={song.lyrics}
-              chords={song.chords}
-              activeTab={activeTab}
-              fontSize={activeTab === 'lyrics' ? fontSizeLyrics : fontSizeChords}
-              lineHeight={lineHeight}
-              displayMode={displayMode}
-              horizontalScrollRef={horizontalScrollRef}
-            />
+          <div className="w-full flex flex-col" style={{ height: 'calc(100vh - 44px - 72px)' }}>
+            <LyricFollowNotice message={audioFollow.error} compact />
+            <div className="flex-1 min-h-0">
+              <SongContentView
+                lyrics={song.lyrics}
+                chords={song.chords}
+                activeTab={activeTab}
+                fontSize={activeTab === 'lyrics' ? fontSizeLyrics : fontSizeChords}
+                lineHeight={lineHeight}
+                displayMode={displayMode}
+                horizontalScrollRef={horizontalScrollRef}
+                activeLineIndex={audioFollow.lineIndex}
+                followScroll={audioFollow.following}
+                onUserScroll={audioFollow.holdBriefly}
+              />
+            </div>
           </div>
         </>
       ) : (
@@ -280,37 +305,50 @@ export default function SongDetailsPage() {
             </div>
           </div>
 
-          <div className="flex items-center mb-6" style={{ borderBottom: '1px solid var(--border-color)' }}>
-            {['lyrics', 'chords'].map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-[1px] ${
-                  activeTab === tab
-                    ? 'text-warm-tan border-warm-tan'
-                    : 'border-transparent'
-                }`}
-                style={{ color: activeTab === tab ? undefined : 'var(--text-secondary)' }}
-              >
-                {{ lyrics: 'Letra', chords: 'Acordes' }[tab]}
-              </button>
-            ))}
-            <div className="flex items-center gap-1 ml-auto">
-              <button
-                onClick={() => setDisplayMode('vertical')}
-                className="p-1.5 rounded-lg transition-all bg-terracotta/25"
-                title="Vertical"
-              >
-                <List className="w-4 h-4" style={{ color: 'var(--color-warm-tan)' }} />
-              </button>
-              <button
-                onClick={() => setDisplayMode('horizontal')}
-                className="p-1.5 rounded-lg transition-all hover:bg-terracotta/15"
-                title="Horizontal"
-              >
-                <Columns className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
-              </button>
+          <div
+            className="sticky top-0 z-30 -mx-6 px-6 pt-1 mb-6"
+            style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg-primary)' }}
+          >
+            <div className="flex items-center">
+              {['lyrics', 'chords'].map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-[1px] ${
+                    activeTab === tab
+                      ? 'text-warm-tan border-warm-tan'
+                      : 'border-transparent'
+                  }`}
+                  style={{ color: activeTab === tab ? undefined : 'var(--text-secondary)' }}
+                >
+                  {{ lyrics: 'Letra', chords: 'Acordes' }[tab]}
+                </button>
+              ))}
+              <div className="flex items-center gap-1 ml-auto">
+                <LyricFollowControls
+                  listening={audioFollow.listening}
+                  paused={audioFollow.paused}
+                  onToggleListen={audioFollow.toggleListening}
+                  onTogglePause={audioFollow.togglePaused}
+                />
+                <span className="w-px h-5 mx-1" style={{ background: 'var(--border-color)' }} />
+                <button
+                  onClick={() => setDisplayMode('vertical')}
+                  className="p-1.5 rounded-lg transition-all bg-terracotta/25"
+                  title="Vertical"
+                >
+                  <List className="w-4 h-4" style={{ color: 'var(--color-warm-tan)' }} />
+                </button>
+                <button
+                  onClick={() => setDisplayMode('horizontal')}
+                  className="p-1.5 rounded-lg transition-all hover:bg-terracotta/15"
+                  title="Horizontal"
+                >
+                  <Columns className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
+                </button>
+              </div>
             </div>
+            <LyricFollowNotice message={audioFollow.error} />
           </div>
 
           <SongContentView
@@ -320,6 +358,9 @@ export default function SongDetailsPage() {
             fontSize={activeTab === 'lyrics' ? fontSizeLyrics : fontSizeChords}
             lineHeight={lineHeight}
             displayMode={displayMode}
+            activeLineIndex={audioFollow.lineIndex}
+            followScroll={audioFollow.following}
+            onUserScroll={audioFollow.holdBriefly}
           />
         </div>
       )}
