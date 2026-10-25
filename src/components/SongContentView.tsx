@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, forwardRef } from 'react';
+import { useRef, useEffect, useCallback, forwardRef } from 'react';
 
 interface SongContentViewProps {
   lyrics?: string;
@@ -10,11 +10,84 @@ interface SongContentViewProps {
   lineHeight: number;
   displayMode: 'vertical' | 'horizontal';
   horizontalScrollRef?: React.Ref<HTMLDivElement>;
+  activeLineIndex?: number | null;
+  followScroll?: boolean;
+  onUserScroll?: () => void;
 }
 
-export default function SongContentView({ lyrics, chords, activeTab, fontSize, lineHeight, displayMode, horizontalScrollRef }: SongContentViewProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+export default function SongContentView({
+  lyrics,
+  chords,
+  activeTab,
+  fontSize,
+  lineHeight,
+  displayMode,
+  horizontalScrollRef,
+  activeLineIndex = null,
+  followScroll = false,
+  onUserScroll,
+}: SongContentViewProps) {
+  const lineRefs = useRef<(HTMLDivElement | null)[]>([]);
   const content = activeTab === 'lyrics' ? lyrics : chords;
+  const lines = content ? content.split('\n') : [];
+
+  const registerLine = useCallback((index: number, node: HTMLDivElement | null) => {
+    lineRefs.current[index] = node;
+  }, []);
+
+  const horizontalScroller = useCallback((): HTMLElement | null => {
+    if (horizontalScrollRef && typeof horizontalScrollRef === 'object') return horizontalScrollRef.current;
+    return null;
+  }, [horizontalScrollRef]);
+
+  useEffect(() => {
+    if (!followScroll || activeLineIndex == null) return;
+    const el = lineRefs.current[activeLineIndex];
+    if (!el) return;
+    scrollLineIntoFollowPosition(el, displayMode, displayMode === 'horizontal' ? horizontalScroller() : null);
+  }, [followScroll, activeLineIndex, displayMode, content, horizontalScroller]);
+
+  useEffect(() => {
+    if (!onUserScroll) return;
+    let lastGesture = 0;
+    let pointerActive = false;
+    const mark = () => { lastGesture = performance.now(); };
+    const onKey = (event: KeyboardEvent) => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) {
+        mark();
+      }
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest('button, input, a, textarea, select')) return;
+      pointerActive = true;
+    };
+    const onPointerUp = () => { pointerActive = false; };
+    const onScroll = () => {
+      if (pointerActive || performance.now() - lastGesture < 900) onUserScroll();
+    };
+
+    window.addEventListener('wheel', mark, { passive: true, capture: true });
+    window.addEventListener('touchmove', mark, { passive: true, capture: true });
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    const scroller = horizontalScroller();
+    scroller?.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('wheel', mark, { capture: true });
+      window.removeEventListener('touchmove', mark, { capture: true });
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+      window.removeEventListener('scroll', onScroll);
+      scroller?.removeEventListener('scroll', onScroll);
+    };
+  }, [onUserScroll, displayMode, content, horizontalScroller]);
 
   if (!content) {
     return (
@@ -24,33 +97,78 @@ export default function SongContentView({ lyrics, chords, activeTab, fontSize, l
     );
   }
 
-  const lines = content.split('\n');
-
-  // ── Modo vertical: una columna, scroll Y ──
   if (displayMode === 'vertical') {
     return (
       <div className="px-1" style={{ fontSize: `${fontSize}px`, color: 'var(--text-primary)' }}>
         {lines.map((line, i) => (
-          <div
+          <LyricRow
             key={i}
-            className={`px-3 py-1.5 ${i % 2 === 0 ? 'bg-white/[0.02]' : ''}`}
-            style={{ color: line.trim() === '' ? 'transparent' : 'var(--text-primary)', lineHeight }}
-          >
-            {line || '\u00A0'}
-          </div>
+            line={line}
+            index={i}
+            active={i === activeLineIndex}
+            lineHeight={lineHeight}
+            zebra={i % 2 === 0 ? 'bg-white/[0.02]' : ''}
+            onRegister={registerLine}
+          />
         ))}
       </div>
     );
   }
 
-  // ── Modo horizontal: columnas que llenan el vh, scroll X ──
   return (
-    <HorizontalView ref={horizontalScrollRef} lines={lines} fontSize={fontSize} lineHeight={lineHeight} />
+    <HorizontalView
+      ref={horizontalScrollRef}
+      lines={lines}
+      fontSize={fontSize}
+      lineHeight={lineHeight}
+      activeLineIndex={activeLineIndex}
+      onRegister={registerLine}
+    />
   );
 }
 
-const HorizontalView = forwardRef<HTMLDivElement, { lines: string[]; fontSize: number; lineHeight: number }>(
-  ({ lines, fontSize, lineHeight }, ref) => {
+function LyricRow({
+  line,
+  index,
+  active,
+  lineHeight,
+  zebra,
+  onRegister,
+}: {
+  line: string;
+  index: number;
+  active: boolean;
+  lineHeight: number;
+  zebra: string;
+  onRegister: (index: number, node: HTMLDivElement | null) => void;
+}) {
+  return (
+    <div
+      ref={(node) => onRegister(index, node)}
+      data-lyric-line={index}
+      data-lyric-active={active ? 'true' : undefined}
+      aria-current={active ? 'true' : undefined}
+      className={`px-3 py-1.5 rounded-lg transition-colors duration-300 break-inside-avoid ${
+        active ? 'lyric-follow-line' : zebra
+      }`}
+      style={{
+        color: line.trim() === '' ? 'transparent' : 'var(--text-primary)',
+        lineHeight,
+      }}
+    >
+      {line || '\u00A0'}
+    </div>
+  );
+}
+
+const HorizontalView = forwardRef<HTMLDivElement, {
+  lines: string[];
+  fontSize: number;
+  lineHeight: number;
+  activeLineIndex: number | null;
+  onRegister: (index: number, node: HTMLDivElement | null) => void;
+}>(
+  ({ lines, fontSize, lineHeight, activeLineIndex, onRegister }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -90,7 +208,6 @@ const HorizontalView = forwardRef<HTMLDivElement, { lines: string[]; fontSize: n
       return () => window.removeEventListener('resize', resize);
     }, [lines, fontSize, lineHeight]);
 
-    // Scroll horizontal con la rueda del mouse
     useEffect(() => {
       const el = containerRef.current;
       if (!el) return;
@@ -119,20 +236,43 @@ const HorizontalView = forwardRef<HTMLDivElement, { lines: string[]; fontSize: n
         }}
       >
         {lines.map((line, i) => (
-          <div
+          <LyricRow
             key={i}
-            className="break-inside-avoid px-3 py-1.5"
-            style={{
-              color: line.trim() === '' ? 'transparent' : 'var(--text-primary)',
-              lineHeight,
-              background: i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent',
-            }}
-          >
-            {line || '\u00A0'}
-          </div>
+            line={line}
+            index={i}
+            active={i === activeLineIndex}
+            lineHeight={lineHeight}
+            zebra={i % 2 === 0 ? 'bg-white/[0.02]' : ''}
+            onRegister={onRegister}
+          />
         ))}
       </div>
     );
   }
 );
 HorizontalView.displayName = 'HorizontalView';
+
+function scrollLineIntoFollowPosition(
+  el: HTMLElement,
+  mode: 'vertical' | 'horizontal',
+  scroller: HTMLElement | null,
+) {
+  const behavior: ScrollBehavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+
+  if (mode === 'horizontal' && scroller) {
+    const cRect = scroller.getBoundingClientRect();
+    const eRect = el.getBoundingClientRect();
+    const visible = eRect.left >= cRect.left + 8
+      && eRect.right <= cRect.right - 8
+      && eRect.top >= cRect.top
+      && eRect.bottom <= cRect.bottom;
+    if (visible) return;
+    const deltaX = eRect.left - (cRect.left + cRect.width * 0.12);
+    scroller.scrollTo({ left: scroller.scrollLeft + deltaX, behavior });
+    return;
+  }
+
+  const deltaY = el.getBoundingClientRect().top - window.innerHeight / 3;
+  if (Math.abs(deltaY) < 28) return;
+  window.scrollTo({ top: Math.max(0, window.scrollY + deltaY), behavior });
+}

@@ -7,6 +7,8 @@ export interface Song {
   cover?: string;
   lyrics?: string;
   chords?: string;
+  /** BCP-47 o nombre ("es", "en", "es-MX"). Si falta, el seguimiento por audio lo estima. */
+  language?: string;
   isPublic?: boolean;
   displayName?: string;
   fontSizeLyrics?: number;
